@@ -1,0 +1,134 @@
+\documentclass{article}
+\input{preamble}
+% graph notations
+\def\allgraphs{\mathcal{G}}
+\def\allsymbols{\mathcal{I}}
+\newcommand{\subgraphs}[1]{\mathcal{G}[#1]}
+\newcommand{\degreevg}[2]{\text{deg}(#1,#2)}
+
+\newcommand{\contractvg}[2]{\mathcal{C}[#1](#2)}
+\newcommand{\contractv}[1]{\mathcal{C}[#1]}
+\newcommand{\deletevg}[2]{\mathcal{D}[#1](#2)}
+\newcommand{\deletev}[1]{\mathcal{D}[#1]}
+\newcommand{\degeneracy}[1]{D(#1)}
+\newcommand{\degeneracypg}[2]{D[#1](#2)}
+\newcommand{\contraction}[1]{C(#1)}
+\newcommand{\contractionpg}[2]{C[#1](#2)}
+
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesg}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesg}[1]{E(#1)}
+\newcommand{\neighborsvg}[2]{N(#1,#2)}
+
+\newcommand{\completebig}[2]{K_{#1,#2}}
+\newcommand{\treewidth}{\mathrm{tw}}
+% combination notations
+\newcommand{\permutations}[1]{\Pi_{#1}}
+\begin{document}
+
+\title{A Graph Family with Treewidth Lower-Bounded by $\omega(\sqrt{|E|})$}
+\author{Zhang Ruiqi}
+\maketitle
+
+\section{Introduction}
+For $n \geq 3$ be an integer, the line graphs of complete bipartite graph $G_n :=L(K_{n,n})$ satisfies
+\begin{align*}
+    \mathrm{tw}(G_n) = \Theta(|V(G_n)|^{\frac{2}{3}}),
+\end{align*}
+which implies
+\begin{align*}
+    \mathrm{tw}(G_n) = \omega(|V(G_n)|^{\frac{1}{2}}).
+\end{align*}
+
+This implies that treewidth of a graph $G$ can't be upper bounded by $O(|\edgesg{G}|^{\frac{1}{2}})$.
+\section{Preliminaries}
+All graphs in this paper are finite, undirected, and without self-loops or multiple edges. 
+
+\begin{definition}[Line Graph]\label{def:line_graph}
+Let $G$ be a graph, its line graph $L(G)$ is defined by
+\begin{align*}
+    \verticesg{L(G)} =& \edgesg{G},\\
+    \edgesg{L(G)} =& \{\{u,v\}|u \cap v \neq \emptyset\}.
+\end{align*}
+\end{definition}
+
+\begin{remark}
+    By definition~\ref{def:line_graph}, the vertices of $L(G)$ are edges of the original graph $G$. Vertices $e_1, e_2$ in $\verticesg{L(G)}$ are adjacent in $L(G)$ if and only if they share a common vertex in $G$.
+\end{remark}
+
+\begin{remark}
+    Following definition~\ref{def:line_graph}, we can easily get the number of edges of $L(G)$.
+
+    \begin{align*}
+        |\edgesg{L(G)}| = \sum_{v \in \verticesg{G}} \binom{\degreevg{v}{G}}{2}.
+    \end{align*}
+    
+    Especially for complete bipartite graph $\completebig{n}{n}$, we have
+    \begin{align}\label{eq:edges_linegraph_complete_bigraph}
+        |\edgesg{L(\completebig{n}{n})}| =& n^2(n-1) \notag \\
+        =& \Theta(n^3).
+    \end{align}
+\end{remark}
+
+For complete bipartite graphs $\completebig{p}{q}$, \cite{HarveyWood2018} establishes a lower bound on the treewidth of their line graphs $L(\completebig{p}{q})$.
+
+\begin{theorem}[Theorem 1.4 in \cite{HarveyWood2018}]\label{thm:tw_lower_bound_of_L(Kpq)}
+    For $p,q \in \mathbb{N}$, 
+    \begin{align*}
+        \mathrm{tw}(L(\completebig{p}{q})) \geq \frac{1}{2}pq-1.
+    \end{align*}
+\end{theorem}
+
+Especially, if $p= q = n \geq 3$, we can determine $\mathrm{tw}(L(\completebig{n}{n}))$ exactly. This result is given from  Theorem~1.4 in \cite{harvey2014treewidth} and Theorem~3.1 in \cite{lucena2007achievable}. 
+
+\begin{theorem}[Treewidth of $L(\completebig{n}{n})$]\label{thm:tw_L(Knn)}
+For any $n \geq 3$ in $\mathbb{N}$, we have
+\begin{align*}
+    \treewidth(L(\completebig{n}{n})) =& \frac{n^2}{2} + \frac{n}{2} - 1 \\
+    =& \Theta(n^2).
+\end{align*}
+\end{theorem}
+
+\section{Main Result}
+The main result of this article is as follows:
+\begin{proposition}\label{pro:unbounded_graphs}
+    There exists a graph sequence $\{G_n\}$, such that
+    \begin{align*}
+        \treewidth(G_n) = \omega(|\edgesg{G_n}|^{\frac{1}{2}}.
+    \end{align*}
+\end{proposition}
+\begin{proof}
+    Let $G_n = L(\completebig{n+2}{n+2}), n \in \mathbb{N}_+$.
+
+    Following Theorem~\ref{thm:tw_L(Knn)}, we have
+    \begin{align}\label{eq:tw_unbounded_graph}
+        \treewidth(G_n) = \Theta(n^2).
+    \end{align}
+
+    Following Equation~\eqref{eq:edges_linegraph_complete_bigraph}, we have
+    \begin{align}\label{eq:number_edges_unbounded_graph}
+        |\edgesg{G_n}| = \Theta(n^3).
+    \end{align}
+
+    Collecting equation~\eqref{eq:tw_unbounded_graph} and equation~\eqref{eq:number_edges_unbounded_graph}, we have
+    \begin{align*}
+        \treewidth(G_n) =& \Theta({|\edgesg{G_n}|^\frac{2}{3}})\\
+        =& \omega({|\edgesg{G_n}|^\frac{1}{2}}).
+    \end{align*}
+    which completes the proof.
+\end{proof}
+
+\begin{remark}
+    Each vertex of $L(\completebig{n}{n})$ is of degree $2n-2$, which is even. This implies that $L(\completebig{n}{n})$ is an Euler graph, and must be corresponding to a V-statistic we need when computing $n^2(n-1)$-order U-statistic of our form.
+
+    For example, $L(\completebig{3}{3})$ is corresponding to a V-statistic with mode
+    \begin{align*}
+        (ab, bc, cd, de, ef, fd, db, bg, gh, hc, ci, ie, ea, ag, gf, fh, hi, ia)
+    \end{align*}
+    which is need to be computed when computing $18$-order U-statistic.
+\end{remark}
+\bibliographystyle{plainnat}
+\bibliography{Master}
+\end{document}
+

@@ -1,0 +1,292 @@
+\documentclass{biometrika}
+\usepackage{float}
+\usepackage[ruled]{algorithm2e}
+\SetKwInOut{Input}{Input}
+\SetKwInOut{Output}{Output\,}
+\SetKwInOut{Data}{Data}
+\SetKwProg{Decomp}{Decomp}{}{EndDecomp}
+\SetKwProg{CombineIndices}{PartitionIndices}{}{EndPartitionIndices}
+\SetKwProg{Vstatistics}{V statistics}{}{End V statistics}
+\usepackage{newtxtext}
+\usepackage[subscriptcorrection]{newtxmath}
+\usepackage{enumitem}
+\usepackage{threeparttable}
+\usepackage[page]{appendix}
+\usepackage{graphicx}
+\usepackage{bibunits}
+\usepackage{booktabs}
+
+\renewcommand{\appendixpagename}{\large\centering Supplementary Materials for \\ ``\mytitle''}
+
+\usepackage{natbib}
+
+\graphicspath{{./Figures/}}
+
+\usepackage{subcaption}
+
+%%% User-defined macros should be placed here, but keep them to a minimum.
+\def\Bka{{\it Biometrika}}
+\def\AIC{\textsc{aic}}
+\def\T{{ \mathrm{\scriptscriptstyle T} }}
+\def\v{{\varepsilon}}
+
+%\addtolength\topmargin{35pt}
+\DeclareMathOperator{\Thetabb}{\mathcal{C}}
+
+\newcommand{\Lin}[1]{{\color{red}{Lin: #1}}}
+\newcommand{\Chen}[1]{{\color{blue}{Chen: #1}}}
+\renewcommand{\_}{\raisebox{.5pt}{\underline{\phantom{x}}}}
+
+\def\expit{\mathrm{expit}}
+\def\logit{\mathrm{logit}}
+\def\CI{\mathrm{CI}}
+\def\det{\mathsf{det}}
+\def\fam{\mathsf{fam}}
+\def\Frechet{Fr\'{e}chet}
+\def\dist{\mathsf{d}}
+\def\T{\mathrm{T}}
+\def\Exp{\mathrm{Exp}}
+\def\Log{\mathrm{Log}}
+\def\Law{\mathsf{Law}}
+\def\Hess{\mathsf{H}}
+\def\Diff{\mathrm{D}}
+\def\P{\mathrm{P}}
+\def\fd{\mathsf{fd}}
+\def\id{\mathsf{id}}
+
+\def\sff{\mathsf{rd}}
+
+\def\bias{\mathsf{bias}}
+
+\def\bmu{\bm{\mu}}
+
+\def\adj{\mathsf{adj}}
+\def\db{\mathsf{db}}
+\def\unadj{\mathsf{unadj}}
+\def\dc{\mathsf{dc}}
+\def\proj{\mathsf{proj}}
+\def\CRE{\mathsf{CRE}}
+\def\lin{\mathsf{lin}}
+\def\zhang{\mathsf{zhang}}
+\def\chen{\mathsf{chen}}
+
+\def\aipw{\mathsf{aipw}}
+\def\ipw{\mathsf{ipw}}
+\def\plim{\mathrm{plim}}
+
+\def\bbU{\mathbb{U}}
+\def\bbV{\mathbb{V}}
+
+\usepackage{xcolor, graphicx, appendix}
+\usepackage[bookmarks, plainpages = false, colorlinks = true, citecolor = teal, linkcolor = chicago-maroon, anchorcolor = red, urlcolor = chicago-maroon]{hyperref}
+\definecolor{chicago-maroon}{RGB}{128,0,0}
+\definecolor{northwestern-purple}{RGB}{82,0,99}
+\usepackage{url}\urlstyle{rm}
+\usepackage{bm, bbm}
+\usepackage{mathtools}
+
+\newcommand{\ones}{\mathbf 1}
+\newcommand{\zeros}{\mathbf 0}
+\newcommand{\reals}{{\mathbb{R}}}
+\newcommand{\integers}{{\mathbb{Z}}}
+\newcommand{\naturals}{{\mathbb{N}}}
+\newcommand{\rationals}{{\mathbb{Q}}}
+\def\bSigma{\bm{\Sigma}}
+
+\def\bOmega{\bm{\Omega}}
+
+\def\trace{\mathsf{tr}}
+\def\bbP{\mathbb{P}}
+\def\bx{\mathbf{x}}
+\def\v{\mathrm{v}}
+\def\bbR{\mathbb{R}}
+\def\bbE{\mathbb{E}}
+\def\sff{\mathsf{rd}}
+\def\bH{\mathbf{H}}
+\def\bI{\mathbf{I}}
+\def\var{\mathsf{var}}
+\def\cov{\mathsf{cov}}
+\def\bM{\mathbf{M}}
+\def\bbeta{\bm{\beta}}
+\def\op{\mathsf{op}}
+\def\bA{\mathbf{A}}
+\def\bv{\mathbf{v}}
+\def\bX{\mathbf{X}}
+\def\by{\mathbf{y}}
+\def\bo{\mathbf{o}}
+\def\bO{\mathbf{O}}
+\def\bt{\mathbf{t}}
+\def\b{\mathrm{b}}
+\def\y{\mathrm{y}}
+\def\IIFF{\mathbb{IF}}
+\def\N{\mathrm{N}}
+\def\calF{\mathcal{F}}
+\def\diff{\mathrm{d}}
+\def\diag{\mathsf{diag}}
+\def\tilde{\widetilde}
+\def\hat{\widehat}
+\def\calO{\mathcal{O}}
+\def\calS{\mathcal{S}}
+\def\calI{\mathcal{I}}
+\def\bbB{\mathbb{B}}
+\def\bbX{\mathbb{X}}
+\def\calX{\mathcal{X}}
+
+
+\def\mytitle{Algorithm of U-Statistics 
+ of Kernel Size 2 and Its Computational Complexity}
+
+\newcommand\indep{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+\def\ci{\perp\!\!\!\perp}
+
+\begin{document}
+\title{\mytitle}
+\maketitle
+
+\begin{bibunit}[biometrika]
+
+\section{Notations and Framework of Algorithm}
+\subsection{U-statistics of kernel size 2}
+We consider a class of U-Statistics whose kernel size is 2.
+\begin{definition}
+    Assume that $\bX_1, \ldots, \bX_n$ are samples from a
+    distribution $\bbP$ on $\bbX$. $h_k: \bbX \times \bbX \to \bbR, \, k = 1,\ldots, m-1$
+    is a family of kernel functions over $\bbX \times \bbX$.
+    A $m-th$ order U-statistics with kernel functions $\{h_k\}_{k=1}^{m-1}$ and samples $\{\bX_k\}_{k=1}^n$ is defined by
+    \begin{align*}
+        \bbU_m^{(2)}(\{h_k\}_{k=1}^{m-1},\{\bX_k\}_{k=1}^n) = \frac{1}{\prod_{k=0}^{m-1} (n-k)} \sum_{\substack{\forall p \neq q, i_p \neq i_q \\ 1 \leq i_p, i_q \leq n}} h_1(\bX_{i_1}, \bX_{i_2}) h_2(\bX_{i_2}, \bX_{i_3}) \cdots h_{m-1}(\bX_{i_{m-1}}, \bX_{i_m}).
+    \end{align*}
+    The family of matrix $\bA^{(k)}: \bA^{(k)}_{ij} = h_k(\bX_i, \bX_j) , \, 1 \leq k \leq m-1$ are called kernel matrices of this U-statistics.
+    Then the U-statistics can be rewritten as
+    \begin{align*}
+        \bbU_m^{(2)}(\{h_k\}_{k=1}^{m-1},\{\bX_k\}_{k=1}^n) = \frac{1}{\prod_{k=0}^{m-1} (n-k)} \sum_{\forall p \neq q, i_p \neq i_q} \bA^{(1)}_{i_1,i_2} \bA^{(2)}_{i_2,i_3} \cdots \bA^{(m-1)}_{i_{m-1}, i_m}
+    \end{align*}
+\end{definition}
+
+Given the family of kernel matrices, $\bbU_m^{(2)}(\{h_k\}_{k=1}^{m-1},\{\bX_k\}_{k=1}^n)$ will be abbreviated as $\bbU_m$ for simplicity.
+
+Our algorithm is based on the decomposition of U-statistics into a linear combination of V-statistics and the whole algorithm contains two steps:
+\begin{itemize}
+    \item[1.] Decomposition of U-statistics to V-statistics and corresponding coefficient.
+    \item[2.] Computation of each related V-statistics.
+\end{itemize}
+
+\subsection{V-statistics with restrictions}
+As U-statistics can be decomposed into a linear combination of V-statistics,
+we need to establish the form of all possible V-statistics related to a U-statistics $\bbU_m$.
+
+\begin{definition}
+    Let $\mathcal{I}_m$ denote a symbol set containing $m$ different symbols and $i_1, i_2, \ldots, i_m$ is some symbols in $\calI_m$.
+    $[m] = \{1, 2, \ldots, m\}$ denote the set of $m$ positive integers. Let $\calS^{(m)} = \{s_k\}_{k=1}^{|\calS^{(m)}|}$ be a partition of set $[m]$ which means $s_p \cap s_q = \emptyset$ and $\bigcup_k{s_k} = \mathcal{I}_m$.
+    Then a V-statistics with restriction $\calS^{(m)}$ related to the $m$-th order U-statistics $\bbU_m$ is given by
+    \begin{align*}
+        \bbV_{m}^{\mathcal{S}^{(m)}} = \sum_{\substack{i_p = i_q, \forall p, q \in s_k, \\ \forall s_k \in \mathcal{S}^{(m)}}} \bA^{(1)}_{i_1,i_2} \bA^{(2)}_{i_2,i_3} \cdots \bA^{(m-1)}_{i_{m-1}, i_m}
+    \end{align*}
+\end{definition}
+
+\begin{remark}
+    The restriction $\calS^{(m)}$ is a partition of $[m]$ and the number of elements in each subset $s_k$ is at least 1. The restriction $\calS^{(m)}$ is used to restrict the indices of the kernel matrices in the V-statistics.
+\end{remark}
+
+\begin{remark}
+    In fact, the V-statistics $\bbV_{m}^{\mathcal{S}^{(m)}}$ is uniquely determined by the partition $\calS^{(m)}$ given the kernel matrices $\{\bA^{(k)}\}_{k=1}^{m-1}$ but is independent of symbol set $\calI_m$ i.e. the $\calI_m$ can be any $m$-element any set has at least $m$ elements. $\calS^{(m)}$ is called the partition representation of a V-statistics with restriction. 
+\end{remark}
+
+\begin{remark}
+    Given a symbol set $\calI_m$, a V-statistics with restriction $\calS^{(m)}$ related to the $m$-th order U-statistics $\bbU_m$ is uniquely determined by a sequence of symbol sequences over $\calI_m$ as $\mathcal{L}(\calS^{(m)}) = \{i_1i_2, i_2i_3, \ldots, i_{m-1}i_m |\, i_p = i_q, \forall p, q \in s, \forall s \in \calS^{(m)}, \, i_p, i_q \in \calI_m \}$. This called a sequence representation of $\bbV_{m}^{\mathcal{S}^{(m)}}$ over $\calI_m$. 
+\end{remark}
+
+\begin{remark}
+    The sequence representation establishes a relationship between V-statistics $\bbV_{m}^{\mathcal{S}^{(m)}}$ and an undirected graph
+    with loops and multiple edges, precisely, an Euler path or Euler loop.
+    All different symbols in $\mathcal{L}(\calS^{(m)})$ are nodes of the graph and all subsequences of $\mathcal{L}(\calS^{(m)})$ are edges. And our computational algorithm and its complexity analysis will be based on this relationship.
+\end{remark}
+% For the first step, we claim our main theorem as follows
+
+% \begin{theorem}
+%     Let $U_m$ be a $m$-th order U-statistics with kernel matrices $\{\bA_k\}_{k=1}^{m-1}$. Then $U_m$ can be decomposed into a linear combination of V-statistics
+% \end{theorem}
+
+% At first we make the convention for the computational form of V-statistics related to computing a $m$-th order U-statistic with former form. 
+
+\section{Algorithm}
+\subsection{Decomposition of U-statistics to V-statistics}
+Now we give our main result of the decomposition of U-statistics to V-statistics as following.
+
+\begin{theorem}
+    Let $\mathcal{I}_m$ is a $m$-element symbol set and $\{\mathcal{S}^{(m)} = \{s_k\}_{k=1}^{|\mathcal{S}^{(m)}|}\}$ are its all possible partitions. The $m$-th order U-statistics is a linear combination of upper V-statistics
+    \begin{align*}
+        \bbU_m = \sum_{\mathcal{S}^{(m)}} w_{\mathcal{S}^{(m)}}\bbV_m^{\mathcal{S}^{(m)}}
+    \end{align*}
+    where
+    \begin{align*}
+        w_{\mathcal{S}^{(m)}} = (-1)^{\sum_{k=1}^{|\mathcal{S}^{(m)}|} (|s_k| - 1)} \prod_{k=1}^{|\mathcal{S}^{(m)}|} (|s_k| - 1)!
+    \end{align*}
+\end{theorem}
+\subsection{Computation of V-statistics}
+
+\section{Computational Complexity}
+
+
+We will give a graph formulization of all $V$-statistics to capture the property of complexity.
+
+\begin{theorem}[Exact Complexity Bound]
+\label{thm:bound_2}
+    For a function $f(k): \naturals \to \naturals$ defined as:
+    \begin{align}
+        f(k) = 
+        \begin{cases}
+            \binom{k}{2} + \frac{k}{2} - 1, & \text{if } k \text{ is even}, \\
+            \binom{k}{2},                    & \text{if } k \text{ is odd},
+        \end{cases}
+    \end{align}
+    the computational complexity exponent of $\bbU_{m}^{\mathsf{all}}$ is characterized by:
+    \begin{align}
+        \operatorname{Com}\left( \bbU_{m} \right) = \sup\{k \geq 1| \, f(k) \leq m\}.
+    \end{align}
+    Here, $\operatorname{Com}\left( \cdot \right)$ denotes the highest power exponent in the computational complexity, indicating that $\bbU_{m}^{\mathsf{all}}$ has complexity $O\left(n^{\operatorname{Com}\left( \bbU_{m}^{\mathsf{all}} \right)}\right)$.
+\end{theorem}
+
+\begin{proof}
+    The proof consists of two main parts:
+    \begin{enumerate}
+        \item First, we demonstrate that the term of highest computational complexity emerges when order $m \ge f(k)$ (see Theorem~\ref{thm:bound_2_largest_numbers}).
+        \item Second, we establish that all other terms exhibit complexity less than or equal to $n^k$ (see Theorem~\ref{thm:bound_2_contraction}).
+    \end{enumerate}
+\end{proof}
+
+
+\begin{theorem}[Enumeration of Terms with Maximum Computational Complexity]
+\label{thm:bound_2_largest_numbers}
+\end{theorem}
+\begin{proof}
+   This problem can be reformulated as finding Eulerian paths in complete graphs. Specifically, we seek the minimum number of duplicate edges that must be added to a complete graph of order $k$ to obtain a graph containing an Eulerian path.
+
+ By Euler's Theorem \citep{polya1983hamiltonian} for undirected graphs, a connected graph contains an Eulerian path if and only if either all vertices have even degree or exactly two vertices have odd degrees.
+   
+   In a complete graph of order $k$, each vertex has degree $k-1$ as it connects to all other vertices. We consider two cases:
+   
+   When $k$ is odd, the degree of each vertex ($k-1$) is even, thus the graph inherently contains an Eulerian path without requiring additional edges.
+   
+When $k$ is even, each vertex has odd degree ($k-1$). To construct an Eulerian path, we must add at least $\frac{k}{2}-1$ edges to ensure exactly two vertices maintain odd degree while all others attain even degree. This is achievable by adding the edges $\left(v_1, v_2\right), \left(v_3, v_4\right), \cdots, \left(v_{k-3}, v_{k-2}\right)$, which results in only vertices $v_{k-1}$ and $v_k$ having odd degree.
+
+   This analysis leads to our function $f(k)$:
+   \begin{align}
+       f(k) = 
+       \begin{cases}
+           \binom{k}{2} + \frac{k}{2} - 1, & \text{if } k \text{ is even}, \\
+           \binom{k}{2},                    & \text{if } k \text{ is odd},
+       \end{cases}
+   \end{align}
+   where $\binom{k}{2}$ represents the initial number of edges in the complete graph, and the additional term $\frac{k}{2} - 1$ accounts for the necessary duplicate edges in the even case.
+\end{proof}
+\begin{theorem}[complexity upper bound]
+\label{thm:bound_2_contraction}
+
+\end{theorem}
+
+\putbib[Master]
+\end{bibunit}
+
+\end{document}

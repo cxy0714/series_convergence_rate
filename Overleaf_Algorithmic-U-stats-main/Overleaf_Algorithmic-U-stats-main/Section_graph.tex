@@ -1,0 +1,446 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\input{preamble.tex}
+
+\usepackage[mathcal]{euscript}
+\usepackage{bbold}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{bibunits}
+
+\newcommand{\Lin}[1]{{\color{purple}{Lin: #1}}}
+\newcommand{\Zhang}[1]{{\color{blue}{Zhang: #1}}}
+\newcommand{\Chen}[1]{{\color{orange}{Chen: #1}}}
+
+\renewcommand{\todo}[2][]{%
+    \textcolor{red}{%
+        \textbf{ \#TODO%
+        \if\relax\detokenize{#1}\relax%
+        \else%
+            \ (#1)%
+        \fi%
+        : #2}%
+    }%
+}
+
+% user-defined macros
+% stats notations
+\newcommand{\uset}{\calU}
+\newcommand{\usetp}[2]{\uset(#1,#2)}
+\newcommand{\vset}{\calV}
+\newcommand{\vsetp}[2]{\vset(#1,#2)}
+
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\ustatp}[2]{\ustat(#1,#2)}
+\newcommand{\vstatp}[2]{\vstat(#1,#2)}
+
+% set notations
+\newcommand{\samplespace}{\bbX}
+\newcommand{\takesetp}[1]{\mathrm{set}[#1]}
+
+% combinatoric notations
+\newcommand{\perm}[1]{\mathrm{Perm}(#1)}
+\newcommand{\partition}{\mathrm{Partition}}
+\newcommand{\partitionp}[1]{\partition(#1)}
+\newcommand{\cover}{\mathcal{C}}
+% \newcommand{\alphabet}{\Gamma}
+% \newcommand{\letter}{\gamma}
+
+% tensor notations
+\newcommand{\ndim}{\mathrm{ndim}}
+\newcommand{\ndimp}[1]{\ndim(#1)}
+% \newcommand{\dim}{\mathrm{dim}}
+\newcommand{\dimp}[2]{\dim[#1](#2)}
+\newcommand{\indexset}{\mathrm{Indices}}
+\newcommand{\tensorcontraction}{\mathrm{contraction}}
+
+
+% Graph notations
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesg}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesg}[1]{E(#1)}
+\newcommand{\neighborsvg}[2]{N(#1,#2)}
+\newcommand{\graphcoverp}[1]{G_{#1}}
+\newcommand{\graphkernelp}[1]{G_{#1}}
+
+% Oh-notaions
+\newcommand{\greater}{\Omega}
+\newcommand{\less}{O}
+\newcommand{\muchgreater}{\omega}
+\newcommand{\muchless}{o}
+\newcommand{\appequal}{\Theta}
+
+% Spaces
+
+\newcommand{\mytensorspace}{\mathbb{T}}
+\newcommand{\mytensorspacep}[1]{\mathbb{T}_{#1}}
+\newcommand{\myindexspace}{\mathbb{I}}  
+\newcommand{\myindexspacep}[1]{\mathbb{I}_{#1}}
+\newcommand{\mygraphspace}{\mathbb{G}}
+\newcommand{\mygraphspacep}[1]{\mathbb{G}_{#1}}
+
+% operators
+\newcommand{\projectionindex}{\operatorname{P}}
+\newcommand{\projectionindexp}[1]{\operatorname{P}_{#1}}
+
+\newcommand{\indextograph}{\operatorname{C}}
+\newcommand{\indextographp}[1]{\operatorname{C}_{#1}}
+
+\newcommand{\sumonverindex}[2]{\operatorname{S}[#1](#2)}
+\newcommand{\eliminatevg}[2]{\operatorname{E}[#1](#2)}
+
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\mse{\mathsf{mse}}
+
+\def\package{}
+
+\begin{document}
+
+\allowdisplaybreaks
+
+\title{On computing and the complexity of computing higher-order $U$/$V$-statistics}
+
+% \author[1]{Xingyu Chen \thanks{E-mail: \texttt{chenxingyu0714@sjtu.edu.cn}}}
+% \author[2]{Ruiqi Zhang \thanks{E-mail: \texttt{zhangruiqi@ecnu.edu.cn}}}
+% \author[1, 3]{Lin Liu \thanks{E-mail: \texttt{linliu@sjtu.edu.cn}}}
+% \author[4]{Rajarshi Mukherjee \thanks{E-mail: \texttt{ram521@mail.harvard.edu}}}
+% \affil[1]{School of Mathematical Sciences, CMA-Shanghai, Shanghai Jiao Tong University, China}
+% \affil[2]{School of Mathematical Sciences, East China Normal University, China}
+% \affil[3]{Institute of Natural Sciences, MOE-LSC, SJTU-Yale Joint Center for Biostatistics and Data Science, Shanghai Jiao Tong University, China}
+% \affil[4]{Department of Biostatistics, Harvard T. H. Chan School of Public Health, U.S.A.}
+    
+\date{\today}
+    
+\maketitle
+    
+\begin{abstract}
+Higher-order $U$/$V$-statistics (or equivalently homogeneous sums) appear frequently in statistics, probability, (theoretical) computer science, economics, statistical physics, and machine learning. It is folklore that these mathematical objects are time consuming to compute in practice. However, to our knowledge, a dedicated and systematic study of the computational complexity of $U$/$V$-statistics is lacking. In this note, we record a few results in that regard, which we believe are valuable to the statistical community and beyond. First, we derive an exact mapping from an $m$-th order $U$-statistic to a linear combination of $V$-statistics of orders no greater than $m$ as generally $V$-statistics are relatively easier to compute than $U$-statistics. Second, we study the connection between the time-complexity of computing a class of $m$-th order $V$-statistics to combinatorial graph theory, which is also closely related to tensor networks. Third, for $V$-statistics of order lower than ??, we characterize their almost exact time-complexity and provide an easy-to-implement python package called \package{}. We hope that this paper serves at least two purposes: 1. The theoretical results can draw attentions from researchers in graph theory, combinatorics, and theoretical computer science to further contribute to the algorithmic aspect of $U$/$V$-statistics; 2. The python package \package{} unloads the burden from practitioners and makes the implementation of $U$/$V$-statistics at least up to order ?? a treat.
+\end{abstract}
+
+\keywords{$U$/$V$-statistics, Graph theory, Combinatorics, Tree-width, Tensor algebra}
+
+\begin{bibunit}[plainnat]
+
+\section{Introduction}
+\label{sec:intro}
+
+Higher-order $U$/$V$-statistics \citep{de2012decoupling}, or equivalently higher-order homogeneous sums, are ubiquitously encountered mathematical objects in various disciplines, including statistics, probability, statistical physics, (theoretical) computer science, machine learning, and etc. In the worst-case scenario, an $m$-th order $U$/$V$-statistic over a sample of size $n$ takes $O (n^{m})$ steps to compute. In applications where $m$ grows only logarithmically with $n$, the time complexity of computing a $U$/$V$-statistic scales exponentially with $n$. Consider $n = 10^{4}$ and $m = \log n = \log 10^{4} \approx 9$, it takes roughly $n^{m} \approx 10^{36}$ steps to finish the computation.
+
+To tackle the difficulty of computing higher-order $U$/$V$-statistics, statisticians and computer scientists have developed various heuristic solutions. \citet{chen2019randomized} borrow the idea of randomized or sketching algorithms from theoretical computer science \citep{mahoney2011randomized, woodruff2014sketching} and study thoroughly the statistical information loss or a lack thereof led by randomization to speed up computation. In their framework, certain terms in higher-order $U$-statistics are thrown away randomly to alleviate the computation burden. For a restricted class of higher-order $U$-statistics with symmetric (or more precisely permutation-invariant) kernels, \citet{kong2018estimating} cleverly recognize that the computation can be accomplished by repeated matrix multiplications. For asymmetric kernels, they also compute an incomplete $U$-statistic instead just in order to have the same time complexity.
+
+The literature on the complexity of exactly computing higher-order $U$/$V$-statistics is rather scarce. This is hardly surprising because the exact time complexity of computing higher-order $U$/$V$-statistics seems to be equal to the number of total summations, obtained via an elementary counting argument. However, as we will demonstrate in the paper, the problem can be more subtle. Due to the combinatorial structure of higher-order $U$/$V$-statistics, it is natural to bring in tools from graph theory and combinatorics. Along this line, Section~?? of \citet{liu2024hypothesis} considered to use di-graphs to represent the structure of a class of $U$-statistics, although computational complexity is not really their focus.
+
+\subsection*{Relevance to various disciplines}
+
+\subsubsection*{Statistics and machine learning}
+
+\subsubsection*{Probability and statistical physics}
+
+\citet{golse2016mean}
+
+\subsubsection*{Theoretical computer science}
+
+\subsection*{Main contributions}
+
+\citet{zhao2024matrix}.
+
+\subsection*{Notation and organization}
+
+Given a nonnegative integer $n$, $[n]$ denotes the integer set $\{1, 2, \ldots, n\}$.
+
+$\mathbb{N}$ is the natural number set that contains zero, i.e $\mathbb{N} = \{ 0,1,2,\cdots,\}$
+Given a nonnegative integer $n$, $K_n$ denotes the complete graph on $n$ vertices.
+
+Given a nonnegative integer $m$ and a set $S$, $\underline{s} := (s_k)_{k=1}^m = (s_1,\ldots, s_k)$, where $s_k \in S, k \in [m]$, denotes a $m$-tuple over $S$. $\takesetp{\underline{s}} \coloneqq \{s_k \mid k\in [m]\}$ denotes the set containing all elements appear in tuple $\underline{s}$. $m$ is referred to as the arity of the tuple $\underline{s}$, denoted by $|\underline{s}|$.
+
+Given a set $S$ and a nonnegative integer $m$, we let $S^m := \{(s_1,\ldots,s_m)|\, s_k \in S, k \in [m] \}$ denote all $m$-tuples over $S$ and let $S^*:= \cup_{m \in \bbN_+} S^m$ denote all tuples over $S$. 
+
+Given a tuple $\underline{s} \in S^m$ and a tuple $\alpha \in [m]^*$, $\underline{s}[\alpha] \coloneqq (s_
+{\alpha_k})_{k=1}^{|\alpha|}$.
+
+Before moving on, we finally remark that we will not discuss any statistical properties of higher-order $U$/$V$-statistics and this paper is exclusively on the computational aspects. 
+
+
+\section{Main Results}
+\label{sec:main}
+
+\subsection{Decomposition of \texorpdfstring{$U$}{U}-statistics}
+\subsubsection{Basic Definitions}
+\begin{definition}[U-set]\label{def:u_set}
+    Assume that $S$ is a finite set and $\pi = \{B_k\}_{k=1}^K$ is a partition of integer set $[m]$, where $m \leq |S|$. The U-set of set $S$ restricted by partition $\pi$ is defined as
+    \begin{align*}
+        \{(s_1, s_2,\ldots,s_m) \in S^m | s_i = s_j, \;\mathrm{iff} \; \exists \, B \in \pi, \mathrm{s.t.} \, i,j \in B\}, 
+    \end{align*}
+    and is denoted by $\usetp{S}{\pi}$. If $\pi$ happens to be the finest partition of $[m]$, i.e. $\pi = \{\{k\}\}_{k=1}^m$, the corresponding U-set is denoted by $\usetp{S}{m}$. The size $K$ of partition $\pi$ is referred to as the order of $\usetp{S}{\pi}$.
+\end{definition}
+
+\begin{definition}[V-set]\label{def:v_set}
+    Assume that $S$ is a finite set and $\pi = \{B_k\}_{k=1}^K$ is a partition of integer set $[m]$. The V-set of set $S$ restricted by partition $\pi$ is defined as
+    \begin{align*}
+        \{(s_1, s_2,\ldots,s_m) \in S^m | s_i = s_j, \forall \, B \in \pi, \forall \, i, j \in B\}, 
+    \end{align*}
+    and is denoted by $\vsetp{S}{\pi}$. If $\pi$ happens to be the finest partition of $[m]$, i.e. $\pi = \{\{k\}\}_{k=1}^m$, the corresponding V-set denoted by $\vsetp{S}{m}$. The size $K$ of partition $\pi$ is referred to as the order of $\vsetp{S}{\pi}$.
+\end{definition}
+
+\begin{remark}
+    In fact, we have
+    \begin{align*}
+        \vsetp{S}{m} = S^m.
+    \end{align*}
+\end{remark}
+We next define $U$-statistics.
+
+\begin{definition}[$U$-statistics]\label{def:u_stat}
+Let $\bbX$ be a Banach space, $m$ be a positive integer, and $h: \bbX^{m} \rightarrow \bbR$ be a function defined on $\bbX^m$. For any finite set $\bm{X}$ of elements in $\bbX$ with cardinality greater than $m$, the $U$-statistic of order $m$ with kernel $h$ takes the following form: 
+    \begin{align*}
+        \ustat(h,\bm{X}) := \sum_{\underline{X} \in \usetp{\bm{X}}{m}} h(\underline{X}). 
+    \end{align*}
+    Here $\bm{X}$ is referred to as the sample set.
+\end{definition}
+
+$V$-statistics are defined similarly.
+\begin{definition}[$V$-statistics]\label{def:v_stat}
+    Let $\bbX$ be a Banach space, $m$ be a positive integer, and $h: \bbX^{m} \rightarrow \bbR$ be a function defined on $\bbX^m$. For any finite set $\bm{X}$ of elements in $\bbX$ with cardinality greater than $m$, the $V$-statistic of kernel $h$ is defined as 
+    \begin{align*}
+        \vstat(h,\bm{X}) := \sum_{\underline{X} \in \vsetp{\bm{X}}{m}} h(\underline{X}).
+    \end{align*}
+
+    Here $h$ is called the kernel function of the $V$-statistic. Integer $m$ is called the order. Set $\bm{X}$ is called the sample set. 
+    
+\end{definition}
+
+% \begin{remark}
+%     There are equivalent definitions of $U$/$V$ statistics using high order tensor. It's discussed in next subsection.
+% \end{remark}
+
+\begin{remark}
+    In fact, values for each dimension of tuple in V-set is independent but is related to each other in U-set. This property makes computation of $V$-statistics much more easier than computation of $U$-statistics, especially when the kernel function has a certain decomposition structure. 
+    That's also why we establish the decomposition from $U$-statistics to $V$-statistics. 
+\end{remark}
+\subsubsection{Decomposition of \texorpdfstring{$U$}{U}-statistics to \texorpdfstring{$V$}{V}-statistics}
+
+\begin{definition}[Restricted $V$-statistics]\label{def:r_v_stat}
+    Let $X$ be a Banach space, $m$ be positive integer, $h$ be a function defined on $X^m$. For any finite subset $\bm{X}$ of $X$ whose size is greater than $m$, $\pi$ is a partition of $[m]$. The $V$-statistic of kernel $h$ restricted by partition $\pi$ is defined as
+    \begin{align*}
+        \vstat[\pi](h,\bm{X}) := \sum_{\underline{X} \in \vsetp{\bm{X}}{\pi}} h(\underline{X}).
+    \end{align*}
+\end{definition}
+
+\begin{theorem}[Decomposition of $U$-statistics to $V$-statistics]\label{thm:decomp_u_stats}
+Let $X$ be a Banach space, $m$ and $n$ be integers such that $m \leq n$, $h$ be a function defined on $X^m$, and $\bm{X}$ be a subset of $X$ with $n$ elements. Then
+\begin{align*}
+    \ustat(h,\bm{X}) = \sum_{\substack{ \pi \in \partitionp{[m]} \\ \pi := \{B_k\}_{k=1}^K} } w_\pi \vstat[\pi](h, \bm{X}), 
+\end{align*}
+where
+\begin{align*}
+    w_\pi = (-1)^{\sum_{k=1}^{K}(|B_k|-1)} \prod_{k=1}^K (B_k-1)!. 
+\end{align*}
+\end{theorem}
+
+The proof of Theorem~\ref{thm:decomp_u_stats} is deferred to Appendix~\ref{app:decomp_u_stats}.
+
+\subsection{Computation of \texorpdfstring{$V$}{V}-statistics}
+\label{subsec:computation_of_V_statistics}
+\subsubsection{Heuristic}
+\label{subsubsec:computation_of_V_statistics_heuristic}
+If the kernel function $h: \bbX^m \to \bbR$ of the underlying $V$-statistic has non-trivial \emph{multiplicative decomposition} as defined below, the computational complexity can be significantly reduced.
+
+In this paper, a floating-point operation is regarded as an elementary operation with cost unit, which include summation and multiplication of two floating-point numbers. In addition, we focus on the scaling behavior of  computational complexity of $U$/$V$ increase in terms of number of samples given a fixed kernel function.
+
+% $h(\underline{X})$ has been pre-computed. 
+
+\subsubsection{Formalization}
+\label{subsubsec:computation_of_V_statistics_formalization}
+
+
+\begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+Assume $h : \samplespace^m \to \reals$ be a function. Let $\calA \coloneqq (A_r)_{r=1}^R \in [m]^{**}$ satisfies $\cup_{r=1}^R \takesetp{A_r} = [m]$. $\calH \coloneqq (h_r : \samplespace^{|A_r|} \to \reals)_{r=1}^R$ is a sequence of functions. $(\calH, \calA)$ is called a multiplicative decomposition of function $h$, if $\forall \underline{x} \in \samplespace^m$, 
+\begin{align*}
+    h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}[A_r]). 
+\end{align*}
+\end{definition}
+
+\begin{definition}[Tensor Decomposition Space]\label{def:tensor_decomp_space}
+Let $m \in \mathbb{N}$. The \emph{tensor decomposition space of order $m$} is the set
+\begin{equation}
+\mytensorspacep{m} \coloneqq \left\{ (\mathcal{T}, \mathcal{A}) \,\middle|\, 
+\begin{aligned}
+    &\mathcal{A} = (A_r)_{r=1}^R \in [m]^{**},\ \cup_{r=1}^R \takesetp{A_r} = [m], \\
+    &\mathcal{T} = (T_r)_{r=1}^R,\ T_r : [n]^{|A_r|} \to \mathbb{R} \text{ for some fixed } n \in \mathbb{N}
+\end{aligned}
+\right\}.
+\end{equation}
+In particular, when $m = 0$, we define
+\begin{equation}
+   \mytensorspacep{0} \coloneqq \left\{ ( ( c ), ( ( ) ) ) \,\middle|\, c \in \mathbb{R} \right\}, 
+\end{equation}
+\end{definition}
+
+where the index decomposition $\mathcal{A} = (( ))$ consisting of the empty index decomposition, and the tensor component $\mathcal{T} = ( c )$ is a constant tensor. 
+
+
+
+
+We now provide a more rigorous formulation. First, we construct a mapping from a kernel function to a graph. Next, we define a transformation on this graph that corresponds to summing over one index in the $V$-statistic defined by the kernel function. This transformation has a clear graphical interpretation. Finally, we show that by simplifying the graph of a kernel function into a simple graph, the treewidth of this graph serves as an exact bound on the computational complexity of the associated $V$-statistics.
+
+We begin by describing the multiplicative decomposition of a kernel function. \Lin{we probably should check if such a concept has been defined somewhere in math literature} Given the sample used to compute the $V$-statistic, both the specific value and the computational procedure of the $V$-statistic are entirely determined by its kernel function. 
+
+% \begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+%     Let $\cover:=\{C_r\}_{r=1}^R$ be a minimal cover of set $[m]$, $h: \bbX^m \to \bbR$ be a function and $\underline{x} := (x_1,\ldots,x_m)$ denote arguments of function $h$. Define $\underline{x}_{C_r} := \{x_j| j\in C_r\}$.  $\calH := \{h_r: \bbR^{|C_r|} \to \bbR\}_{r=1}^R$ is called a multiplicate decomposition of $h$, if there are permutations $\{\underline{x}_r \in \perm{\underline{x}_{C_r}}\}_{r=1}^R$, s.t. 
+%     \begin{align*}
+%         h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}_r).
+%     \end{align*}
+
+%     If the cover $\cover$ is non-trivial, the multiplicative decomposition is called non-trivial. If $C_p \not\subseteq C_q, \forall p,q \in[R]:p \neq q$, the multiplicative decomposition is called irreducible.
+% \end{definition}
+
+% \begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+% Assume $h : \samplespace^m \to \reals$ be a function. Let $\calA \coloneqq (A_r)_{r=1}^R \in [m]^{**}$ satisfies $\cup_{r=1}^R \takesetp{A_r} = [m]$. $\calH \coloneqq (h_r : \samplespace^{|A_r|} \to \reals)_{r=1}^R$ is a sequence of functions. $((h_r, A_r))_{r=1}^R$ is called a multiplicative decomposition of function $h$, if $\forall \underline{x} \in \samplespace^m$, 
+% \begin{align*}
+%     h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}[A_r]). 
+% \end{align*}
+     
+% \end{definition}
+% \begin{remark}
+%     Without loss of generality, we assume $\underline{x}_r$ is in increasing order because we can always redefine $h_r$ such that it holds. In this way, pair $(\calH, \cover)$ uniquely determine a multiplicative decomposition of function $h$ without providing permutations. 
+% \end{remark}
+\begin{remark}
+    When focusing solely on the computational procedure, the specific functional form—i.e., $\calH$—is not essential, as long as the functions involved are real-valued. What truly determines the computational process is the structure of the decomposition, which is described by the cover $\cover$. Therefore, we will use $\cover$ to capture the following concepts.
+\end{remark}
+
+Now, let's witness the beauty.
+
+\begin{definition}[Characteristic Graph]\label{def:graph}
+    Let $\cover := \{C_r\}_{r=1}^R$ be a minimal cover of the set $[m]$. A simple graph $G := (V, E)$—which allows isolated vertices but forbids multiple edges and self-loops—is called the \emph{characteristic graph of cover $\cover$}, denoted by $\graphcoverp{\cover}$, if it is constructed as follows:
+    \begin{enumerate}
+        \item The vertex set is $V := [m]$;
+        \item The edge set is $E := \{\{i,j\} \mid \exists C \in \cover \text{ such that } i, j \in C\}$.
+    \end{enumerate}
+
+    % If $(\calH, \cover)$ is a multiplicative decomposition of a kernel function $h$, then we define the \emph{characteristic graph of the kernel function $h$} as the characteristic graph of its associated cover $\cover$. Furthermore, the \emph{characteristic graph of a $V$-statistic} defined by the kernel $h$ is also defined as the characteristic graph of $h$, and thus ultimately determined by the cover $\cover$.
+\end{definition}
+\begin{remark}
+    The characteristic graph of different $\cover$ maybe same, for example, when $m=3$, $\cover_{1} = \{ \{ 1,2,3 \}\}$ and $\cover_{2} = \{ \{ 1,2\}, \{ 1,3\}, \{ 2, 3 \}\}$ both have the $3$-th order complete graph $K_{3}$ as their characteristic graph.
+\end{remark}
+
+
+% \begin{definition}[The map from $V$-stats to graph]
+% \label{def:map_V_stats_to_graph}
+% Given a $V$-statistics defined by the $m$-th order kernel function $h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}_r)$, we define a graph $G = (V, E)$ by the following rules:
+% \begin{itemize}
+%     \item every argument $x_i$ denotes a vertex $i$ in $G$.
+%     \item edge $\{i,j\}$ exists iff argument $x_{i}, x_{j}$ in some factor function $h_r(\underline{x}_r)$.
+% \end{itemize}
+% Actually, the graph defined above only depends on the cover of $[m]$ 
+% \end{definition}
+
+Now, consider the computation of an $m$-th order $V$-statistic. A natural—and the approach we adopt—is to iteratively sum over one index at a time. This process yields a sequence of lower-order $V$-statistics: the $(m-1)$-th, $(m-2)$-th, and so on, until it eventually reduces to a constant. At that point, the computation is complete. By comparing each induced $V$-statistic with the original one, we can naturally define a transformation on the corresponding graph that represents the operation of summing over a single index. The similar transformation concept was proposed in (?) named Vertex elimination. 
+
+
+\begin{definition}[Vertex elimination]
+\label{def:vertex_elimination_of_graph}
+    Let $G$ be a graph. To eliminate vertex $v \in \verticesg{G}$ from graph $G$ is to 
+    \begin{enumerate}
+        \item connect all neighbors of $v$ to a clique i.e. complete subgraph, and
+        \item delete vertex $v$ from graph $G$. 
+    \end{enumerate}
+    The graph constructed by this way is denoted by $
+    \eliminatevg{v}{G}$. 
+    % The graph of eliminate vertex $v$ from graph $G$ is graph constructed from deleting $v$ from $G$ and connecting all neighbors of vertex $v$ to each other, denoted by $\eliminatevg{v}{G}$. More specifially:
+    % \begin{align*}
+    %     \eliminatevg{v}{G} = (\verticesg{G} \backslash \{v\}, (\edgesg{G} \backslash E_1) \cup E_2),
+    % \end{align*}
+    % where $E_1 = \{e\in \edgesg{G}:v\in e\}$ and $E_2 = \{\{v_1,v_2\}: v_1, v_2 \in \neighborsvg{v}{G}, \, v_1 \neq v_2\}$.
+\end{definition}
+
+
+
+
+\subsubsection{Multiplicative Decomposition of Kernel Function and Tensor Form}
+
+\begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+Assume $h : \samplespace^m \to \reals$ be a function. Let $\calA \coloneqq (A_r)_{r=1}^R \in [m]^{**}$ satisfies $\cup_{r=1}^R \takesetp{A_r} = [m]$. $\calH \coloneqq (h_r : \samplespace^{|A_r|} \to \reals)_{r=1}^R$ is a sequence of functions. $(\calH, \calA)$ is called a multiplicative decomposition of function $h$, if $\forall \underline{x} \in \samplespace^m$, 
+\begin{align*}
+    h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}[A_r]). 
+\end{align*}
+\end{definition}
+
+\begin{remark}
+    If the kernel function $h$ of a V-statistic $\vstatp{h}{\bm{X}}$ has multiplicative decomposition $(\calH, \calA)$, we also represent it by $\vstat(\calH, \calA, \bm{X})$. 
+\end{remark}
+
+In this paper, we defined tensor as a real valued map on the Cartesian product of some integer sets. We assume each dimension of a tensor has the same size unless explicitly mentioned otherwise. Let $m$ and $n$ be nonnegative integers, a $m$-order with size $n$ is a map from $[n]^m$ to $\reals$. 
+
+For a V-statistic $\vstat(\calH, \calA, \bm{X})$, if we permute $\bm{X}$ as $\underline{X} \coloneqq (X_i)_{i=1}^n$ and construct tensors as following: $\forall \, r \in [R]$, 
+\begin{align*}
+    H_r(\alpha_r) := h_r(\underline{X}[\alpha]), \, \forall \, \alpha_r \in [n]^{|A_r|}, 
+\end{align*}
+then the V-statistic has a tensor form
+\begin{align*}
+    \vstat(\calH, \calA, \bm{X}) = \sum_{\alpha \in [n]^m} \prod_{r=1}^R H_r(\alpha[A_r]). 
+\end{align*}
+which is a tensor contraction formally defined in section~\ref{sec:tensor_contraction}. We must point out that the permutation selection of sample set $\bm{X}$ doesn't matters---it doesn't affect the computational result. 
+
+\todo{there are several advantages of tensor form and multiplicative decomposition plays an essential role in it}
+
+\subsubsection{Tensor Contraction}\label{sec:tensor_contraction}
+
+Tensor contraction is extension of matrix multiplication in high order tensors. It's an operation between a list of tensors under some rules which is called tensor expression. 
+
+\begin{definition}[Tensor Expression]\label{def:tensor_expression}
+    Let $m$ be a nonnegative integer, a tuple $\calA \coloneqq (A_r)_{r=1}^R \in [\naturals]_+^{**}$ is defined as a $m$-th order tensor expression if $|\cup_{r=1}^R \takesetp{A_r}| = m$. 
+
+    Each integer appears in $\calA$ is referred as to be an index of expression $\calA$. All the integers is referred as to the index set of expression $\calA$, denoted by $\indexset(\calA)$.
+
+    The tensor expression $\calA$ is standard, if $\indexset(\calA) = [m]$. 
+    
+    A tuple of tensors $(H_r)_{r=1}^{R}$ is admissible to expression $\calA$, if
+    \begin{align*}
+        \ndimp{H_r} = |A_r|, \, \forall \, r \in [R]. 
+    \end{align*}
+\end{definition}
+
+\todo{establish equivalence between tensor expressions, especially standard and others}
+
+% \begin{definition}
+%     Let $\calA$ and $\calB$ be tensor expressions. $\calB$ is equivalent to $\calA$, if for any tensor tuple $\calH$ admissible to $\calA$, 
+%     \begin{enumerate}
+%         \item $\calH$ is admissible to $\calB$, 
+%         \item $|\calA| = |\calB|$. 
+%     \end{enumerate}
+% \end{definition}
+
+% \begin{definition}[Tensor Contraction]\label{def:tensor_contraction}
+%     Let $(\calA \coloneqq (A_r)_{r=1}^R, B)$ be a $m$-th order tensor and $(H_r)_{r=1}^R$ be a legal tensor sequence to $(\calA, B)$. Tensor $H$ is contraction of tensors  $(H_r)_{r=1}^R$ under expression $(\calA, B)$, if $\forall \underline{i} \in [\dim[B[1]]] \times \cdots \times [\dim[B[|B|]]]$, 
+%     \begin{align*}
+%         H[\underline{i}] = \sum_{\underline{j}\in \{ \underline{k} \in [\dim[1]] \times \cdots [\dim[m]] \mid \underline{k}[B] = \underline{i}\}} \prod_{r=1}^R H_r[\underline{j}[A_r]]
+%     \end{align*}
+% \end{definition}
+
+\begin{definition}[Tensor Contraction]\label{def:tensor_contraction}
+    Suppose that $\calA \coloneqq (A_r)_{r=1}^R$ is a standard $m$-th order tensor expression and $\calH := (H_r)_{r=1}^R$ is an admissible tensor tuple to $\calA$ with size $n$. The contraction of tensors $(H_r)_{r=1}^R$ under expression $\calA$ is defined as
+    \begin{align*}
+        \sum_{\alpha \in [n]^m} \prod_{r=1}^R H_r(\alpha[A_r]),  
+    \end{align*}
+    which is denoted by $\tensorcontraction(\calH, \calA)$.
+\end{definition}
+
+\begin{remark}
+\label{rem:libraries}
+There exist a few open-source libraries providing efficient implementation of tensor contraction, such as \href{https://numpy.org/doc/2.1/reference/generated/numpy.einsum.html}{\texttt{numpy.einsum}}, \href{https://pytorch.org/docs/stable/generated/torch.einsum.html}{\texttt{pytorch.einsum}} and etc. 
+\end{remark}
+
+\subsection{Algorithm and Computational Complexity of Tensor Contraction}
+% Remaining libraries implement tensor contraction pair by pair---we call it tensor-wise tensor contraction, i.e. contract two tensor each time until contract all tensors to a real number. But it's hard to analyze computational complexity this way and even more badly, it fails in some cases. \todo{some examples to explain it.} So we develop a new method to perform it---we call it index-wise tensor contraction. 
+
+
+
+
+\putbib[\myreferences]
+\end{bibunit}
+\appendix
+
+
+\end{document}

@@ -1,0 +1,1074 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\input{preamble.tex}
+\usepackage{cancel}
+\usepackage[mathcal]{euscript}
+\usepackage{bbold}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{bibunits}
+\usepackage{makecell}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+
+\newcommand{\Lin}[1]{{\color{purple}{Lin: #1}}}
+\newcommand{\Zhang}[1]{{\color{blue}{Zhang: #1}}}
+\newcommand{\Chen}[1]{{\color{orange}{Chen: #1}}}
+
+\newcommand{\ai}[1]{{\color{red}{[AI: #1]}}}
+\newcommand{\aipolish}{\ai{polish}}
+
+\renewcommand{\todo}[2][]{%
+    \textcolor{red}{%
+        \textbf{ \#TODO%
+        \if\relax\detokenize{#1}\relax%
+        \else%
+            \ (#1)%
+        \fi%
+        : #2}%
+    }%
+}
+
+% user-defined macros
+\newcommand{\pdfu}{\texorpdfstring{$U$}{U}}
+\newcommand{\pdfv}{\texorpdfstring{$V$}{V}}
+\newcommand{\libref}[2]{\href{#2}{\texttt{#1}}}
+
+\newcommand{\mobius}{M\"obius}
+
+\newcommand{\numpy}{\libref{numpy}{https://numpy.org/}}
+\newcommand{\torch}{\libref{pytorch}{https://pytorch.org/}}
+
+% simplified command
+\newcommand{\wt}{\overline}
+\newcommand{\diag}{\mathsf{Diag}}
+\newcommand{\diagp}[1]{\diag(#1)}
+\newcommand{\sPi}{\pi}
+\newcommand{\sper}{\sigma}
+
+% HOIF
+\newcommand{\IF}{\mathbb{IF}}
+\newcommand{\BD}{\mathbb{BD}}
+\newcommand{\factorial}[1]{#1\mathpunct{!}}
+
+% stats notations
+\newcommand{\uset}{\calU}
+\newcommand{\usetnm}[2]{\uset\left(#1,#2\right)}
+\newcommand{\vset}{\calV}
+\newcommand{\vsetp}[2]{\vset(#1,#2)}
+
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\ustatp}[2]{\ustat(#1,#2)}
+\newcommand{\vstatp}[2]{\vstat(#1,#2)}
+
+% set notations
+\newcommand{\samplespace}{\bbX}
+\newcommand{\takesetp}[1]{\mathsf{set}[#1]}
+\newcommand{\cartesianprod}{\bigotimes}
+
+% combinatoric notations
+\newcommand{\perm}[1]{\mathsf{Perm}(#1)}
+\newcommand{\partition}{\Pi}
+
+\newcommand{\partitionp}[1]{\partition_{#1}}
+\newcommand{\finest}{\mathsf{Fin}}
+\newcommand{\finestp}[1]{\finest[#1]}
+\newcommand{\coarsest}{\mathsf{Coa}}
+\newcommand{\coarsestp}[1]{\coarsest[#1]}
+\newcommand{\cover}{\mathcal{C}}
+\newcommand{\stirling}{\calS}
+\newcommand{\stirlingp}[2]{\stirling(#1,#2)}
+
+% tensor notations
+\newcommand{\ndim}{\mathsf{ndim}}
+\newcommand{\ndimp}[1]{\ndim(#1)}
+\newcommand{\rank}{\mathrm{rank}}
+% \newcommand{\dim}{\mathrm{dim}}
+\newcommand{\dimp}[2]{\dim[#1](#2)}
+\newcommand{\indexset}{\mathsf{Indices}}
+\newcommand{\teq}{\overset{\mathrm{t.e.}}{=}}
+\newcommand{\canonicalform}{\mathsf{canonical}}
+\newcommand{\tensorcontraction}{\mathsf{Contraction}}
+
+% partial order in partition
+\newcommand{\pleq}{\preceq}
+\newcommand{\pgeq}{\succeq}
+\newcommand{\pless}{\prec}
+\newcommand{\pgreater}{\succ}
+
+% Graph notations
+\newcommand{\degp}[2]{\deg_{#2}(#1)}
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesp}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesp}[1]{E(#1)}
+\newcommand{\neighborvg}[2]{N_{#2}(#1)}
+
+\newcommand{\treewidth}{\mathsf{tw}}
+\newcommand{\treewidthp}[1]{\mathsf{tw}(#1)}
+\newcommand{\quotientgraphp}[1]{\mathcal{Q}(#1)}
+\newcommand{\graphset}{\mathcal{G}^{*}}
+\newcommand{\graphsetne}[2]{\mathcal{G}_{#1,#2}^{*}}
+
+\newcommand{\degeneracy}{D}
+\newcommand{\degeneracyg}[1]{\degeneracy(#1)}
+\newcommand{\completegraphp}[1]{\mathrm{K}_{#1}}
+\newcommand{\graphtype}[1]{G_{#1}}
+\newcommand{\motifrg}[2]{\mathsf{C}(#1,#2)}
+% Oh-notaions
+\newcommand{\greater}{\Omega}
+\newcommand{\less}{O}
+\newcommand{\muchgreater}{\omega}
+\newcommand{\muchless}{o}
+\newcommand{\appequal}{\Theta}
+
+% operators
+\newcommand{\eliminatevg}[2]{\mathsf{elim}_{#1}(#2)}
+
+
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\mse{\mathsf{mse}}
+
+\def\package{\libref{u-stats}{https://github.com/Amedar-Asterisk/U-Statistics-python}}
+
+\begin{document}
+
+\section{A Heuristic Example}
+
+% Here we consider a running example will be discussed more carefully in Sec~\ref{sec:example_hoif}.
+
+% We are aiming to compute a $m$-th U-statistics with a kernel function structue:
+
+% \begin{equation}
+%     h_m ( X_1, X_2,\dots, X_m) = h(X_1, X_2)  h(X_2, X_3) \dots h(X_{m-1},X_{m})
+% \end{equation}
+
+The 4-th order HOIF is a $U$-statistic with kernel like
+\begin{equation*}
+    h(X_1,X_2,X_3,X_4) = h_1(X_1,X_2)h_2(X_2,X_3)h_3(X_3,X_4), 
+\end{equation*}
+
+It has a decomposition form $\calA_{HOIF,4} = ( (1,2), (2,3), (3, 4) )$, its characteristic graph is a chain graph:
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[every node/.style={circle, draw=black, fill=white, inner sep=2pt}, node distance=1.5cm]
+    \node (1) at (0,0) {1};
+    \node (2) at (1.5,0) {2};
+    \node (3) at (3,0) {3};
+    \node (4) at (4.5,0) {4};
+
+    \draw (1) -- (2);
+    \draw (2) -- (3);
+    \draw (3) -- (4);
+\end{tikzpicture}
+\caption{Characteristic graph of $\calA_{\text{HOIF},4} = \big( (1,2), (2,3), (3,4) \big)$}
+\end{figure}
+
+We have a direct decomposition of $U$-statistics according to our definition of $V$-statistics, in which each block in a partition is interpreted as a single composite index.
+
+\begin{align*}
+\ustat(h, \bm{X}) = \; & 
+\hspace{1em}
+\vstat[\{1\}\{2\}\{3\}\{4\}](h, \bm{X}) \\
+& 
+- \vstat[\{1,2\}\{3\}\{4\}](h, \bm{X})
+- \vstat[\{1,3\}\{2\}\{4\}](h, \bm{X})
+- \vstat[\{1,4\}\{2\}\{3\}](h, \bm{X}) \\
+& 
+- \vstat[\{2,3\}\{1\}\{4\}](h, \bm{X})
+- \vstat[\{2,4\}\{1\}\{3\}](h, \bm{X})
+- \vstat[\{3,4\}\{1\}\{2\}](h, \bm{X}) \\
+& 
++ \vstat[\{1,2\}\{3,4\}](h, \bm{X})
++ \vstat[\{1,3\}\{2,4\}](h, \bm{X})
++ \vstat[\{1,4\}\{2,3\}](h, \bm{X}) \\
+& 
++ 2\vstat[\{1,2,3\}\{4\}](h, \bm{X})
++ 2\vstat[\{1,2,4\}\{3\}](h, \bm{X})
++ 2\vstat[\{1,3,4\}\{2\}](h, \bm{X})
++ 2\vstat[\{2,3,4\}\{1\}](h, \bm{X}) \\
+& 
+- 6\vstat[\{1,2,3,4\}](h, \bm{X}).
+\end{align*}
+
+
+We will assemble following 3 tensors (matrices) to represent the data
+\begin{equation*}
+    A_1(i,j) = h_1(X_i,X_j), A_2(i,j) = h_2(X_i,X_j), A_3(i,j) = h_3(X_i,X_j).
+\end{equation*}
+
+Then the $U$-statistics is :
+\begin{equation*}
+    \ustat(h, \bm{X}) = \sum_{1 \le i_1 \neq i_2 \neq i_3 \neq i_4 \leq n}  A_1(i_1,i_2)A_2(i_2,i_3)A_3(i_3,i_4).
+\end{equation*}
+
+After de diagonal the data matrix (i.e. let $\diagp{A_1} =  \diagp{A_2} = \diagp{A_3} = \bm{0}$), we will see the value of the U-statistic remains unchanged, but many terms in above decomposition just become zero. 
+
+\begin{align*}
+\ustat(h, \bm{X}) =\; & 
+\hspace{1em}
+\vstat[\{1\}\{2\}\{3\}\{4\}](h, \bm{X}) \\
+& 
+- \cancel{\vstat[\{1,2\}\{3\}\{4\}](h, \bm{X})}
+- \vstat[\{1,3\}\{2\}\{4\}](h, \bm{X})
+- \vstat[\{1,4\}\{2\}\{3\}](h, \bm{X}) \\
+& 
+- \cancel{\vstat[\{2,3\}\{1\}\{4\}](h, \bm{X})}
+- \vstat[\{2,4\}\{1\}\{3\}](h, \bm{X})
+- \cancel{\vstat[\{3,4\}\{1\}\{2\}](h, \bm{X})} \\
+& 
++ \cancel{\vstat[\{1,2\}\{3,4\}](h, \bm{X})}
++ \vstat[\{1,3\}\{2,4\}](h, \bm{X})
++ \cancel{\vstat[\{1,4\}\{2,3\}](h, \bm{X})} \\
+& 
++ \cancel{2\vstat[\{1,2,3\}\{4\}](h, \bm{X})}
++ \cancel{2\vstat[\{1,2,4\}\{3\}](h, \bm{X})}
++ \cancel{2\vstat[\{1,3,4\}\{2\}](h, \bm{X})}
++ \cancel{2\vstat[\{2,3,4\}\{1\}](h, \bm{X})} \\
+& 
+- \cancel{\vstat[\{1,2,3,4\}](h, \bm{X})}.
+\end{align*}
+
+
+Now we only need to compute $5$ $V$-statistics. And their decomposition form and characteristic graph is list below in Table~\ref{tab:v_graph_hoif_4}:
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{V-statistic} & \textbf{decomposition form} & \textbf{Characteristic Graph}  \\
+\hline
+
+$\vstat[\{1\}\{2\}\{3\}\{4\}] = \sum_{i_1,i_2,i_3,i_4} A_1(i_1,i_2) A_2(i_2,i_3) A_3(i_3,i_4)$ 
+& $((1,2), (2,3), (3,4))$ 
+& \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (1.2,0) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (2.4,0) {3};
+    \node[draw, circle, inner sep=1pt] (4) at (3.6,0) {4};
+    \draw (1) -- (2) -- (3) -- (4);
+\end{tikzpicture} 
+\\
+\hline
+
+$\vstat[\{1,3\}\{2\}\{4\}] = \sum_{i_1,i_2,i_3} A_1(i_1,i_2) A_2(i_2,i_1) A_3(i_1,i_3)$ 
+& $((1,2), (2,1), (1,3))$ 
+& \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0.6) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (-0.8,-0.6) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (0.8,-0.6) {3};
+    \draw (1) -- (2);
+    \draw (1) -- (3);
+\end{tikzpicture} 
+ \\
+\hline
+
+$\vstat[\{1,4\}\{2\}\{3\}] = \sum_{i_1,i_2,i_3} A_1(i_1,i_2) A_2(i_2,i_3) A_3(i_3,i_1)$ 
+& $((1,2), (2,3), (3,1))$ 
+& \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (90:1) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (210:1) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (330:1) {3};
+    \draw (1) -- (2) -- (3) -- (1);
+\end{tikzpicture} 
+ \\
+\hline
+
+$\vstat[\{2,4\}\{1\}\{3\}] = \sum_{i_1,i_2,i_3} A_1(i_1,i_2) A_2(i_2,i_3) A_3(i_3,i_2)$ 
+& $((1,2), (2,3), (3,2))$ 
+& \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0.6) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (-0.8,-0.6) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (0.8,-0.6) {3};
+    \draw (1) -- (2);
+    \draw (2) -- (3);
+\end{tikzpicture} 
+ \\
+\hline
+
+$\vstat[\{1,3\}\{2,4\}] = \sum_{i_1,i_2} A_1(i_1,i_2) A_2(i_2,i_1) A_3(i_1,i_2)$ 
+& $((1,2), (2,1), (1,2))$ 
+& \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (1.2,0) {2};
+    \draw (1) -- (2);
+\end{tikzpicture} 
+ \\
+\hline
+
+\end{tabular}
+\caption{V-statistics, decomposition forms and their characteristic graphs.}
+\label{tab:v_graph_hoif_4}
+\end{table}
+
+
+Next, we will use $\vstat[\{1,4\}\{2\}\{3\}](h, \bm{X})$ to show the corresponding relationship between computation procedure and the characteristic graph in Figure~\ref{fig:elim_example}. 
+
+
+\begin{figure}[ht]
+    \centering
+\begin{tikzpicture}[
+    node distance=1.7cm and 1.5cm,
+    every node/.style={font=\small},
+    expr/.style={draw, rectangle, rounded corners, align=center, text width=5.2cm, minimum height=1.5cm},
+    decomp/.style={draw, rectangle, align=center, text width=3.1cm, minimum height=1.2cm},
+    arrow/.style={-{Latex}, thick},
+    point/.style={circle, draw, minimum size=5.5mm, inner sep=0pt, font=\small},
+    graphbox/.style={draw, align=center, minimum width=1.8cm, minimum height=1.2cm, inner sep=3pt}
+]
+
+% Left: computation expressions
+\node[expr] (e1) {
+    $\displaystyle \sum_{{\color{red}i_1},i_2,i_3} A_1({\color{red}i_1}, i_2)\, A_2(i_2, i_3)\, A_3(i_3, {\color{red}i_1})$
+};
+\node[expr, below=of e1] (e2) {
+    $\displaystyle \sum_{{\color{blue}i_2}, i_3} A_2({\color{blue}i_2}, i_3)\, A_4({\color{blue}i_2}, i_3)$
+};
+\node[expr, below=of e2] (e3) {
+    $\displaystyle \sum_{{\color{orange}i_3}} A_5({\color{orange}i_3})$
+};
+\node[expr, below=of e3] (e4) {
+    End \\
+    Max complexity $O(n^3)$
+};
+
+% Middle: decomposition form
+\node[decomp, right=of e1] (d1) {
+    $((1,2)(2,3)(3,1))$
+};
+\node[decomp, below=of d1] (d2) {
+    $((2,3)(2,3))$
+};
+\node[decomp, below=of d2] (d3) {
+    $((3))$
+};
+\node[decomp, below=of d3] (d4) {
+    End
+};
+
+% Right: graph diagrams
+\node[graphbox, right=of d1] (g1) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=red!20] (1) at (0,0.7) {\textcolor{red}{1}};
+        \node[point] (2) at (-0.6,-0.35) {2};
+        \node[point] (3) at (0.6,-0.35) {3};
+        \draw[red, thick] (1) -- (2);
+        \draw[red, thick] (1) -- (3);
+        \draw (2) -- (3);
+    \end{tikzpicture}
+};
+
+\node[graphbox, below=of g1] (g2) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=blue!20] (2) at (-0.4, 0) {\textcolor{blue}{2}};
+        \node[point] (3) at (0.4, 0) {3};
+        \draw[blue, thick] (2) -- (3);
+    \end{tikzpicture}
+};
+
+\node[graphbox, below=of g2] (g3) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=orange!30] (3) at (0, 0) {\textcolor{orange}{3}};
+    \end{tikzpicture}
+};
+
+\node[graphbox, below=of g3] (g4) {
+    End \\
+    $\treewidthp{G_1} = 2$
+};
+
+% Arrows between computation expressions
+\draw[arrow] (e1) -- node[left, align=left] {
+    Summing over $\color{red}i_1$ \\
+    Complexity: $O(n^3)$ \\
+    $A_4(i_2, i_3) = \sum_{\color{red}i_1} A_1 A_3$
+} (e2);
+
+\draw[arrow] (e2) -- node[left, align=left] {
+    Summing over $\color{blue}i_2$ \\
+    Complexity: $O(n^2)$ \\
+    $A_5(i_3) = \sum_{\color{blue}i_2} A_2 A_4$
+} (e3);
+
+\draw[arrow] (e3) -- node[left, align=left] {
+    Summing over $\color{orange}i_3$ \\
+    Complexity: $O(n^1)$ \\
+    Scalar = $\sum_{\color{orange}i_3} A_5$
+} (e4);
+
+% Arrows between decomposition forms (no labels)
+\draw[arrow] (d1) -- (d2);
+\draw[arrow] (d2) -- (d3);
+\draw[arrow] (d3) -- (d4);
+
+% Arrows between graph diagrams
+\draw[arrow] (g1) -- node[right, align=left] {
+    Vertex elimination $({\color{red}1}, G_1)$ \\
+    $\deg({\color{red}1}, G_1) = 2$
+} (g2);
+
+\draw[arrow] (g2) -- node[right, align=left] {
+    Vertex elimination $({\color{blue}2}, G_2)$ \\
+    $\deg({\color{blue}2}, G_2) = 1$
+} (g3);
+
+\draw[arrow] (g3) -- node[right, align=left] {
+    Vertex elimination $({\color{orange}3}, G_3)$ \\
+    $\deg({\color{orange}3}, G_3) = 0$
+} (g4);
+
+\end{tikzpicture}
+    \caption{Computation procedure, decomposition forms, and characteristic graph evolution for $\vstat[\{1,4\}\{2\}\{3\}](h, \bm{X})$.}
+    \label{fig:elim_example}
+\end{figure}
+
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+    node distance=1.7cm and 1.6cm,
+    every node/.style={font=\small},
+    expr/.style={draw, rectangle, rounded corners, align=center, text width=5.5cm, minimum height=1.5cm},
+    decomp/.style={draw, rectangle, align=center, text width=3.1cm, minimum height=1.2cm},
+    arrow/.style={-{Latex}, thick},
+    point/.style={circle, draw, minimum size=5.5mm, inner sep=0pt, font=\small},
+    graphbox/.style={draw, align=center, minimum width=1.8cm, minimum height=1.2cm, inner sep=3pt}
+]
+
+% === COLUMN 1: Tensor expressions ===
+\node[expr] (e1) {
+    $\displaystyle \sum_{ {\color{red}i_1}, i_2, i_3, i_4} h_1({\color{red}i_1}, i_2)\, h_2(i_2, i_3)\, h_3(i_3, i_4)$
+};
+\node[expr, below=of e1] (e2) {
+    $\displaystyle \sum_{{\color{blue}i_2}, i_3, i_4} h_4({\color{blue}i_2})\, h_2({\color{blue}i_2}, i_3)\, h_3(i_3, i_4)$
+};
+\node[expr, below=of e2] (e3) {
+    $\displaystyle \sum_{ {\color{orange}i_3}, i_4} h_5({\color{orange}i_3})\, h_3({\color{orange}i_3}, i_4)$
+};
+\node[expr, below=of e3] (e4) {
+    $\displaystyle \sum_{{\color{violet}i_4}} h_6({\color{violet}i_4})$
+};
+\node[expr, below=of e4] (e5) {
+    End \\
+    Max complexity $O(n^2)$
+};
+
+% % === COLUMN 2: Function Decompositions ===
+% \node[decomp, right=of e1] (d1) {
+%     $((1,2)(2,3)(3,4))$
+% };
+% \node[decomp, below=of d1] (d2) {
+%     $((2)(2,3)(3,4))$
+% };
+% \node[decomp, below=of d2] (d3) {
+%     $((3)(3,4))$
+% };
+% \node[decomp, below=of d3] (d4) {
+%     $((4))$
+% };
+% \node[decomp, below=of d4] (d5) {
+%     End
+% };
+
+% === COLUMN 3: Graphs ===
+\node[graphbox, right=of d1] (g1) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=red!20] (1) at (0, 0.7) {\textcolor{red}{$i_1$}};
+        \node[point] (2) at (1, 0.7) {$i_2$};
+        \node[point] (3) at (2, 0.7) {$i_3$};
+        \node[point] (4) at (3, 0.7) {$i_4$};
+        \draw[red, thick] (1) -- (2);
+        \draw (2) -- (3) -- (4);
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g1] (g2) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=blue!20] (2) at (0, 0.7) {\textcolor{blue}{2}};
+        \node[point] (3) at (1, 0.7) {3};
+        \node[point] (4) at (2, 0.7) {4};
+        \draw[blue, thick] (2) -- (3);
+        \draw (3) -- (4);
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g2] (g3) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=orange!30] (3) at (0, 0.7) {\textcolor{orange}{3}};
+        \node[point] (4) at (1, 0.7) {4};
+        \draw[orange, thick] (3) -- (4);
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g3] (g4) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=violet!30] (4) at (0, 0.7) {\textcolor{violet}{4}};
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g4] (g5) {
+    End \\
+    $\treewidthp{G} = \max_{1\le i \le 4} \deg_{i} = 1$
+};
+
+% === Arrows: Computation steps ===
+\draw[arrow] (e1) -- node[left, align=left] {
+    Sum over $\color{red}i_1$ \\
+    $h_4(i_2) = \sum_{\color{red}i_1} h_1$
+} (e2);
+
+\draw[arrow] (e2) -- node[left, align=left] {
+    Sum over $\color{blue}i_2$ \\
+    $h_5(i_3, i_4) = \sum_{\color{blue}i_2} h_4 h_2$
+} (e3);
+
+\draw[arrow] (e3) -- node[left, align=left] {
+    Sum over $\color{orange}i_3$ \\
+    $h_6(i_4) = \sum_{\color{orange}i_3} h_5 h_3$
+} (e4);
+
+\draw[arrow] (e4) -- node[left, align=left] {
+    Sum over $\textcolor{violet}{i_4}$ \\
+    Scalar = $\sum h_6$
+} (e5);
+
+% % === Arrows: Decomposition steps ===
+% \draw[arrow] (d1) -- (d2);
+% \draw[arrow] (d2) -- (d3);
+% \draw[arrow] (d3) -- (d4);
+% \draw[arrow] (d4) -- (d5);
+
+% === Arrows: Graph evolution ===
+\draw[arrow] (g1) -- node[right, align=left] {
+    Eliminate $\color{red}1$, $\deg_1 =1$
+} (g2);
+\draw[arrow] (g2) -- node[right, align=left] {
+    Eliminate $\color{blue}2$, $\deg_2 =1$
+} (g3);
+\draw[arrow] (g3) -- node[right, align=left] {
+    Eliminate $\color{orange}3$, $\deg_3 =1$
+} (g4);
+\draw[arrow] (g4) -- node[right, align=left] {
+    Eliminate $\textcolor{violet}{4}$, $\deg_4=0$
+} (g5);
+
+\end{tikzpicture}
+\caption{Computation, decomposition, and graph evolution for chain graph tpye $((1,2)(2,3)(3,4))$.}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+    node distance=1.7cm and 2.8cm, % 稍微增加横向间距
+    every node/.style={font=\small},
+    expr/.style={
+        draw, rectangle, rounded corners,
+        align=center,
+        text width=7.7cm, % 增加文本框宽度
+        minimum height=1.2cm % 增加高度
+    },
+    graphbox/.style={
+        draw, align=center,
+        minimum width=2.0cm, % 稍微加宽
+        minimum height=1.2cm,
+        inner sep=3pt
+    },
+    arrow/.style={-{Latex}, thick},
+    point/.style={
+        circle, draw, minimum size=5.5mm,
+        inner sep=0pt, font=\small
+    }
+]
+
+% === COLUMN 1: Tensor expressions ===
+\node[expr] (e1) {
+    $\displaystyle \sum_{i_2, i_3, i_4} \Big( \sum_{{\color{red}i_1}} h_1(X_{\color{red}i_1}, X_{i_2}) \Big) h_2(X_{i_2}, X_{i_3}) h_3(X_{i_3}, X_{i_4})$
+};
+\node[expr, below=of e1] (e2) {
+    $\displaystyle \sum_{i_3, i_4} \Big( \sum_{{\color{blue}i_2}} h_4(X_{\color{blue}i_2})\, h_2(X_{{\color{blue}i_2}}, X_{i_3}) \Big) h_3(X_{i_3}, X_{i_4})$
+};
+\node[expr, below=of e2] (e3) {
+    $\displaystyle \sum_{i_4} \Big( \sum_{{\color{orange}i_3}} h_5(X_{{\color{orange}i_3}})  h_3(X_{{\color{orange}i_3}}, X_{i_4})\Big)$
+};
+\node[expr, below=of e3] (e4) {
+    $\displaystyle \sum_{{\color{violet}i_4}} h_6(X_{{\color{violet}i_4}})$
+};
+\node[expr, below=of e4] (e5) {
+    End \\ Max complexity $O(n^2)$
+};
+
+% === COLUMN 2: Graphs ===
+\node[graphbox, right=of e1] (g1) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=red!20] (1) at (0, 0.7) {\textcolor{red}{$i_1$}};
+        \node[point] (2) at (1, 0.7) {$i_2$};
+        \node[point] (3) at (2, 0.7) {$i_3$};
+        \node[point] (4) at (3, 0.7) {$i_4$};
+        \draw[red, thick] (1) -- (2);
+        \draw (2) -- (3) -- (4);
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g1] (g2) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=blue!20] (2) at (0, 0.7) {\textcolor{blue}{$i_2$}};
+        \node[point] (3) at (1, 0.7) {$i_3$};
+        \node[point] (4) at (2, 0.7) {$i_4$};
+        \draw[blue, thick] (2) -- (3);
+        \draw (3) -- (4);
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g2] (g3) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=orange!30] (3) at (0, 0.7) {\textcolor{orange}{$i_3$}};
+        \node[point] (4) at (1, 0.7) {$i_4$};
+        \draw[orange, thick] (3) -- (4);
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g3] (g4) {
+    \begin{tikzpicture}[scale=0.9]
+        \node[point, fill=violet!30] (4) at (0, 0.7) {\textcolor{violet}{$i_4$}};
+    \end{tikzpicture}
+};
+\node[graphbox, below=of g4] (g5) {
+    End \\ $ \max_{1\le k \le 4} \deg(i_k) = 1$
+};
+
+% === Arrows: Computation steps ===
+\draw[arrow] (e1) -- node[left, align=left] {
+    \makecell{Sum over $\color{red}{i_1}$ \\ $O(n^2)$}
+} (e2);
+
+\draw[arrow] (e2) -- node[left, align=left] {
+    \makecell{Sum over $\color{blue}i_2$ \\ $O(n^2)$}
+} (e3);
+
+\draw[arrow] (e3) -- node[left, align=left] {
+    \makecell{Sum over $\color{orange}i_3$ \\ $O(n^2)$}
+} (e4);
+
+\draw[arrow] (e4) -- node[left, align=left] {
+    \makecell{Sum over $\color{violet} i_4$ \\  $O(n)$}
+} (e5);
+
+% === Arrows: Graph evolution ===
+\draw[arrow] (g1) -- node[right, align=left] {
+    \makecell{Eliminate $\color{red}i_1$ \\ $\deg(i_1)=1$}
+} (g2);
+\draw[arrow] (g2) -- node[right, align=left] {
+    \makecell{Eliminate $\color{blue}i_2$ \\ $\deg(i_2)=1$}
+} (g3);
+\draw[arrow] (g3) -- node[right, align=left] {
+    \makecell{Eliminate $\color{orange}i_3$ \\ $\deg(i_3)=1$}
+} (g4);
+\draw[arrow] (g4) -- node[right, align=left] {
+    \makecell{Eliminate $\textcolor{violet}{i_4}$ \\ $\deg(i_4)=0$}
+} (g5);
+
+\end{tikzpicture}
+% \caption{Computation and graph evolution for chain graph type $((1,2)(2,3)(3,4))$.}
+\end{figure}
+
+Figure~\ref{fig:elim_example} illustrates two key aspects of the computation procedure for a $V$-statistic with characteristic graph $G$, assuming we can find an optimal elimination ordering then the computational complexity is bounded by $O ( n^{\treewidthp{G} + 1})$.
+
+
+Finally, we can determin the computational complexity by directly finding an elimination ordering of the characteristic graph of the $4$-th-order HOIF, see Table~\ref{tab:graph_ordering_treewidth}. This requires only $O(n^3)$ complexity, just like matrix multiplication, and this property extends up to the $7$-th order.
+
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.5}
+\setlength{\tabcolsep}{10pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Characteristic Graph} & \textbf{Elimination Ordering} & \textbf{Treewidth} & \textbf{Complexity} \\
+\hline
+
+\begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (1.2,0) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (2.4,0) {3};
+    \node[draw, circle, inner sep=1pt] (4) at (3.6,0) {4};
+    \draw (1) -- (2) -- (3) -- (4);
+\end{tikzpicture} 
+& $1 \to 2 \to 3 \to 4$ 
+& $1$ 
+& $O(n^2)$ \\
+\hline
+
+\begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0.6) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (-0.8,-0.6) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (0.8,-0.6) {3};
+    \draw (1) -- (2);
+    \draw (1) -- (3);
+\end{tikzpicture} 
+& $2 \to 3 \to 1$ 
+& $1$ 
+& $O(n^2)$\\
+\hline
+
+\begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (90:1) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (210:1) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (330:1) {3};
+    \draw (1) -- (2) -- (3) -- (1);
+\end{tikzpicture} 
+& $1 \to 2 \to 3$ 
+& $2$ 
+& $O(n^3)$\\
+\hline
+
+\begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0.6) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (-0.8,-0.6) {2};
+    \node[draw, circle, inner sep=1pt] (3) at (0.8,-0.6) {3};
+    \draw (1) -- (2);
+    \draw (2) -- (3);
+\end{tikzpicture} 
+& $1 \to 3 \to 2$ 
+& $1$
+& $O(n^2)$\\
+\hline
+
+\begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt] (1) at (0,0) {1};
+    \node[draw, circle, inner sep=1pt] (2) at (1.2,0) {2};
+    \draw (1) -- (2);
+\end{tikzpicture} 
+& $1 \to 2$ 
+& $1$ 
+& $O(n^2)$ \\
+\hline
+
+\end{tabular}
+\caption{Characteristic graphs, elimination orderings, and treewidths.}
+\label{tab:graph_ordering_treewidth}
+\end{table}
+
+
+
+
+Actually, the characteristic graph of the required $V$-statistics can be constructed using the quotient graph, as illustrated in Figure~\ref{fig:quotient_graph_hoif_4}. Therefore, once the characteristic graph corresponding to the kernel function's decomposition form is known, we can focus on the maximum treewidth across the family of resulting quotient graphs to obtain the optimal computational bound.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    node distance=1cm and 2.5cm,
+    every node/.style={font=\small},
+    graph/.style={draw, circle, inner sep=1pt, minimum size=6mm},
+    quotient/.style={draw, minimum width=1.8cm, minimum height=1.2cm, align=center},
+    line/.style={thick}
+]
+
+% Center: Main characteristic graph
+\node[quotient] (main) {
+    \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+        \node[graph] (1) at (0,0) {1};
+        \node[graph] (2) at (1.2,0) {2};
+        \node[graph] (3) at (2.4,0) {3};
+        \node[graph] (4) at (3.6,0) {4};
+        \draw (1) -- (2) -- (3) -- (4);
+    \end{tikzpicture} \\
+    $\calA_{HOIF,4}$
+};
+
+% Five quotient graphs below
+\node[quotient, below left=3cm and 4.5cm of main] (q1) {
+    \begin{tikzpicture}[scale=0.6]
+        \node[graph] (1) at (0,0) {1};
+        \node[graph] (2) at (1.2,0) {2};
+        \node[graph] (3) at (2.4,0) {3};
+        \node[graph] (4) at (3.6,0) {4};
+        \draw (1) -- (2) -- (3) -- (4);
+    \end{tikzpicture}
+};
+
+\node[quotient, below left=3cm and 1.5cm of main] (q2) {
+    \begin{tikzpicture}[scale=0.6]
+        \node[graph] (1) at (0,0.6) {1};
+        \node[graph] (2) at (-0.8,-0.6) {2};
+        \node[graph] (3) at (0.8,-0.6) {3};
+        \draw (1) -- (2);
+        \draw (1) -- (3);
+    \end{tikzpicture}
+};
+
+\node[quotient, below=3cm of main] (q3) {
+    \begin{tikzpicture}[scale=0.6]
+        \node[graph] (1) at (90:1) {1};
+        \node[graph] (2) at (210:1) {2};
+        \node[graph] (3) at (330:1) {3};
+        \draw (1) -- (2) -- (3) -- (1);
+    \end{tikzpicture}
+};
+
+\node[quotient, below right=3cm and 1.5cm of main] (q4) {
+    \begin{tikzpicture}[scale=0.6]
+        \node[graph] (1) at (0,0.6) {1};
+        \node[graph] (2) at (-0.8,-0.6) {2};
+        \node[graph] (3) at (0.8,-0.6) {3};
+        \draw (1) -- (2);
+        \draw (2) -- (3);
+    \end{tikzpicture}
+};
+
+\node[quotient, below right=3cm and 4.5cm of main] (q5) {
+    \begin{tikzpicture}[scale=0.6]
+        \node[graph] (1) at (0,0) {1};
+        \node[graph] (2) at (1.2,0) {2};
+        \draw (1) -- (2);
+    \end{tikzpicture}
+};
+
+% Lines with partition labels (all undirected)
+\draw[line] (main) -- node[left=3pt] {$\{1\}\{2\}\{3\}\{4\}$} (q1);
+\draw[line] (main) -- node[left=2pt] {$\{1 3\}\{2\}\{4\}$} (q2);
+\draw[line] (main) -- node[right=2pt] {$\{1 4\}\{2\}\{3\}$} (q3);
+\draw[line] (main) -- node[right=2pt] {$\{2 4\}\{1\}\{3\}$} (q4);
+\draw[line] (main) -- node[right=3pt] {$\{1 3\}\{2 4\}$} (q5);
+
+\end{tikzpicture}
+\caption{The characteristic graph of $\calA_{HOIF,4}$ and the quotient graphs induced by needed partitions.}
+\label{fig:quotient_graph_hoif_4}
+\end{figure}
+
+\newpage
+
+The sub-expressions of expression~\ref{eq:hoif_4_expression} and related contraction procedure is summarized as in table~\ref{}. 
+
+\begin{table}[htbp]
+\centering
+\caption{Sub-expressions of expression related to 4-th order HOIF}
+\begin{tabular}{c|c|c|c|c}
+\hline
+\textbf{sub-expression} & \makecell{\textbf{ contracted} \\ \textbf{index}} & \makecell{\textbf{contracting} \\ \textbf{expression}} & \makecell{ \textbf{remaining} \\ \textbf{expression}} & \textbf{related graph}  \\
+\hline
+$ab,ba,ab$  & \makecell{ $a$ \\ $b$}  & \makecell{ $ab,ba,ab \to b$ \\ $b \to $} & \makecell{ $b$ \\ None} &  \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (a) at (0,0) {a};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (b) at (1.2,0) {b};
+    \draw (a) -- (b);
+\end{tikzpicture}  \\
+
+\hline
+
+$ab,bc,cb$ & \makecell{ $a$ \\ $c$ \\ $b$}  & \makecell{ $ab \to b$ \\ $bc,cb \to b$ \\ $b,b \to $} & \makecell{ $bc,cb,b$ \\ $b,b$ \\None} &  \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (b) at (0,0.6) {b};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (a) at (-0.8,-0.6) {a};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (c) at (0.8,-0.6) {c};
+    \draw (b) -- (a);
+    \draw (b) -- (c);
+\end{tikzpicture}  \\
+
+\hline
+
+$ab,bc,ca$ & \makecell{ $a$ \\ $b$ \\ $c$}  & \makecell{ $ab,ca \to bc$ \\ $bc,bc \to c$ \\ $c \to $} & \makecell{ $bc,bc$ \\ $c$ \\None} &  \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (a) at (90:1) {a};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (b) at (210:1) {b};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (c) at (330:1) {c};
+    \draw (a) -- (b) -- (c) -- (a);
+\end{tikzpicture}  \\
+
+\hline
+$ab,ba,ad$ & \makecell{ $d$ \\ $b$ \\ $a$}  & \makecell{ $ad \to a$ \\ $ab,ba \to a$ \\ $a,a \to $} & \makecell{ $ab,ba,a$ \\ $a,a$ \\None} &  \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (a) at (0,0.6) {a};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (b) at (-0.8,-0.6) {b};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (d) at (0.8,-0.6) {d};
+    \draw (a) -- (b);
+    \draw (a) -- (d);
+\end{tikzpicture}  \\
+
+\hline
+$ab,bc,cd$ & \makecell{ $a$ \\ $b$ \\ $c$ \\$d$ }  & \makecell{ $ab \to b$ \\ $bc,b \to c$ \\ $c,cd \to d$ \\ $d \to $} & \makecell{ $bc,cd,b$ \\ $cd,c$ \\ $d$ \\None} &  \begin{tikzpicture}[scale=0.6, baseline={(0,-0.2)}]
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (a) at (0,0) {a};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (b) at (1.2,0) {b};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (c) at (2.4,0) {c};
+    \node[draw, circle, inner sep=1pt, minimum size=4.5mm] (d) at (3.6,0) {d};
+    \draw (a) -- (b) -- (c) -- (d);
+\end{tikzpicture}  \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\section{Examples in U-Statistic Reduction}
+
+In their Section~5.1, a $U$-statistic is introduced to define the squared distance covariance between random vector $X$ and $Y$ as follows:
+\begin{equation*}
+    \mathsf{dCov}^2(X, Y) \coloneqq \binom{n}{4}^{-1} \sum_{i < j < q < r} h(Z_i, Z_j, Z_q, Z_r),
+\end{equation*}
+where the kernel function $h(Z_i, Z_j, Z_q, Z_r)$ is defined as the symmetrization of a base function $h_0$, that is,
+\begin{equation*}
+    h(Z_i, Z_j, Z_q, Z_r) = \mathsf{S}[h_0(Z_i, Z_j, Z_q, Z_r)],
+\end{equation*}
+with
+\begin{align*}
+    h_0(Z_i, Z_j, Z_q, Z_r) & = a_{i,j}b_{q,r} + a_{i,j}b_{i,j} - a_{i,j}b_{i,q} - a_{i,j}b_{j,r} \\
+    & \eqqcolon h_{01}(Z_i, Z_j, Z_q, Z_r) + h_{02}(Z_i, Z_j) - h_{03}(Z_i, Z_j, Z_q) - h_{04}(Z_i, Z_j, Z_r).
+\end{align*}
+
+Here, $a_{i,j}$ and $b_{i,j}$ denote entries from the pairwise distance matrices computed from $X$ and $Y$, respectively, and $\mathsf{S}[\cdot]$ denotes the full symmetrization operator, which averages the base function $h_0$ over all $4!$ permutations of the arguments to ensure symmetry.
+
+Indeed, the above $U$-statistics can be written directly as
+\begin{align*}
+    \mathsf{dCov}^2(X, Y) & = \frac{1}{\binom{n}{4} \cdot 4!} \sum_{(i,j,q,r) \in \usetnm{n}{4}} h_0(Z_i, Z_j, Z_q, Z_r) \\
+    & = \frac{1}{\binom{n}{4} \cdot 4!} \sum_{(i,j,q,r) \in \usetnm{n}{4}} h_0(Z_i, Z_j, Z_q, Z_r).
+\end{align*}
+
+It thus breaks into 4 $U$-statistics, and the complexity will be $O(n^2)$ if the matrices $a_{i,j}$ and $b_{i,j}$ are already prepared, since their characteristic graphs always have no more than $2$ edges.
+
+
+\begin{remark}
+    Symmetrization operator is very common in relation to the kernel function of $U$-statistics. When making a base function symmetric via the symmetrization operator, the decomposition structure will be destroyed and the characteristic graph will become a complete graph.
+
+\Chen{A nearly proved conjecture states that once a non-constant $m$-argument function $h$ is symmetric and can be decomposed into two functions, each depending on fewer than $m$ arguments, then the only possible decomposition is of the form $h(x_1, x_2, \dots, x_m) = \prod_{i=1}^{m} h_i(x_i)$. Thus, if a symmetric function does not take the form $\prod_{i=1}^{m} h_i(x_i)$, it cannot be further decomposed nontrivially (i.e., not as a constant times another function).}
+
+Thus, when facing the computation task of $U$-statistics, we should always de-symmetrize the function; using the base function is enough, since by our definition of $U$-statistics, we always have:
+\begin{align*}
+\ustatp{h_0}{\bm{X}} &= \frac{1}{\binom{n}{m} \cdot m!} \sum_{i_1 \neq i_2 \neq \dots \neq i_m} h_0(X_{i_1}, X_{i_2}, \dots, X_{i_m}) \\
+&= \binom{n}{m}^{-1} \sum_{i_1 < i_2 < \dots < i_m} \mathsf{S}[h_0](X_{i_1}, X_{i_2}, \dots, X_{i_m}).
+\end{align*}
+
+\end{remark}
+
+
+
+\section{Conception in Graph}
+
+\begin{definition}[Vertex Elimination, Definition~7 in \citet{bodlaender2010treewidth}]
+\label{def:vertex_elimination}
+Let $G = (V, E)$ be a graph and $v \in V$. To eliminate $v$ from $V$ is to connect $\neighborvg{v}{G}$ to a clique and Remove the vertex $v$ and all edges incident to $v$. The graph constructed by this way is denoted by $\eliminatevg{v}{G}$. 
+\end{definition}
+
+
+
+\begin{definition}[Treewidth, Vertex Elimination Form, Theorem~6 in \citet{bodlaender2010treewidth}]
+\label{def:treewidth_elimination}
+Let $G = (V, E)$ be a graph of size $n$ and let $\sper$ be a permutation of the vertex set $V$ (also called an \emph{elimination ordering} of $G$). A sequence of graphs $(G_0, G_1, \dots, G_n)$ is defined as $G_i = \eliminatevg{\sigma[i]}{G_{i-1}}$ with initial term $G_0 = G$. Then the treewidth of graph $G$ can be defined as 
+\begin{equation*}
+    \treewidthp{G} \coloneqq \min_{\sigma \in \perm{V}} \max_{i \in [n]} \degp{\sper[i]}{G_{i-1}}. 
+\end{equation*}
+\end{definition}
+
+
+\begin{definition}[Quotient Graph]
+Let $G = (V, E)$ be a graph.  
+A quotient graph of $G$ with respect to a partition $\sPi$ of $V$ is defined as $G/\pi \coloneqq (\pi, E_{\pi})$, where
+\begin{equation*}
+    E_\pi = \left\{\{B_i,B_j\} \subseteq \pi \mid \exists v_1 \in B_i, v_2 \in B_j, \text{ such that } \{v_1, v_2\} \in E\right\}. 
+\end{equation*}
+
+All the quotient graphs of $G$ is denoted by $\quotientgraphp{G}$, i,e. 
+\begin{equation*}
+    \quotientgraphp{G} \coloneqq \left\{G/\pi \mid \pi \in \partitionp{V}\right\}. 
+\end{equation*}
+\end{definition}
+
+
+
+
+\begin{definition}[Multiplicative Decomposition of a Function]\label{def:mul_decomp}
+    Let $\samplespace$ be a non-empty set, $m$ a positive integer, and $h$ a function defined on $\samplespace^m$. Suppose $\calA \coloneqq (A_k)_{k=1}^K \in [m]^{**}$ satisfies $\bigcup_{k=1}^K \takesetp{A_k} = [m]$, and let $\calH \coloneqq (h_k)_{k=1}^K$ be a tuple of functions where each $h_k$ is defined on $\samplespace^{|A_k|}$. 
+
+    We say that $(\calH, \calA)$ is a \emph{multiplicative decomposition} of the function $h$, and refer to $\calA$ as the \emph{decomposition form} of $h$, if for all $\bm{x} \in \samplespace^m$, the following holds:
+    \begin{align*}
+        h(\bm{x}) = \prod_{k=1}^K h_k\big(\bm{x}[A_k]\big).
+    \end{align*}
+\end{definition}
+
+
+The multiplicative decomposition structure is not rare in statistics and other areas. There are many forms of $U/V$-statistics have such structure and some of them are shown in Section~\ref{sec:examples}. 
+
+We now define a graph associated with a decomposition form, which effectively captures the structural dependencies involved in the computation. 
+
+
+\begin{definition}[Characteristic Graph of Decomposition Form]\label{def:graph_decomp}
+    Let $\calA \in [m]^{**}$ be a decomposition form. The characteristic graph of $\calA$ is a graph with vertices $[m]$ and edges
+    \begin{equation*}
+        \{\{i,j\} \subseteq [m] \mid \exists A \in \calA, \text{s.t. } i,j \in A\}. 
+    \end{equation*}
+\end{definition}
+
+% \begin{remark}
+%         And since a decomposition form can always be seen as a tensor expression with no output part.
+% \end{remark}
+
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm and 0.5cm, 
+    every node/.style={font=\small},
+    expr/.style={
+        draw, rectangle, rounded corners,
+        align=center,
+        text width=4cm,      
+        minimum height=1.0cm, 
+        anchor=center         
+    },
+    graphbox/.style={
+        draw, align=center,
+        minimum width=2.0cm,
+        minimum height=2.0cm,  
+        inner sep=4pt,
+        anchor=center          
+    },
+    ellipsis/.style={
+    font=\Large,
+    inner sep=6pt,        
+    minimum height=2em,
+    anchor=center
+    },
+    arrow/.style={-{Latex}, thick},
+    point/.style={
+        circle, draw, minimum size=5mm,
+        inner sep=0pt, font=\small
+    }
+]
+
+% === COLUMN 1: Tensor expressions ===
+\node[expr] (e1) {
+    $(({\color{red} 1},{\color{blue} 2}),(2,3),(3,4),({\color{blue} 4},{\color{red} 1}))$
+};
+\node[expr, below= 2cm of e1] (e2) {
+    $((2,3),(3,4),{\color{blue} (2,4)})$
+};
+
+% === COLUMN 2: Graphs ===
+\node[graphbox, right= of e1] (g1) {
+    \begin{tikzpicture}[scale=0.85, baseline=(current bounding box.center)]
+        \node[point, fill=red!20] (1) at (0,1) {$1$};
+        \node[point, fill=blue!20] (2) at (1,1) {$2$};
+        \node[point] (3) at (1,0) {$3$};
+        \node[point, fill=blue!20] (4) at (0,0) {$4$};
+        \draw[blue, thick] (1) -- (2);
+        \draw[blue, thick] (1) -- (4);
+        \draw (2) -- (3) -- (4);
+    \end{tikzpicture}
+};
+
+\node[graphbox, below= of g1] (g2) {
+    \begin{tikzpicture}[scale=0.85, baseline=(current bounding box.center)]
+        \node[point, fill=blue!20] (2) at (1,1) {$2$};
+        \node[point] (3) at (1,0) {$3$};
+        \node[point, fill=blue!20] (4) at (0,0) {$4$};
+        \draw[blue, thick] (2) -- (4);
+        \draw (2) -- (3) -- (4) -- (2);
+    \end{tikzpicture}
+};
+
+% === Ellipsis nodes (no border) ===
+\node[ellipsis, below=1.9cm of e2] (e3) {$\ldots$};
+\node[ellipsis, below=1.2cm of g2] (g3) {$\ldots$};
+
+% === Arrows ===
+\draw[arrow] (e1) -- node[left]{sum over $1$} (e2);
+\draw[arrow] (g1) -- node[left]{eliminate $1$} (g2);
+\draw[arrow] (e2) -- (e3);
+\draw[arrow] (g2) -- (g3);
+
+
+\end{tikzpicture}
+\end{figure}
+\end{document}

@@ -1,0 +1,72 @@
+Polynomial Fitting Results (3rd Order: a*n^3 + b*n^2 + c*n + d)
+Analysis for n >= 4000
+======================================================================
+
+Computation Time (nodiag_times) Analysis:
+--------------------------------------------------
+m=4:
+  n^3 coefficient: 7.046626e-12
+  n^2 coefficient: 4.893277e-08
+  n coefficient: 3.422635e-89
+  constant: 2.789094e-08
+  R2 value: 0.998086
+  Estimated n^3 operations: ~7
+
+m=5:
+  n^3 coefficient: 4.453576e-11
+  n^2 coefficient: 2.147024e-07
+  n coefficient: 7.204950e-106
+  constant: 5.306509e-09
+  R2 value: 0.998854
+  Estimated n^3 operations: ~44
+
+m=6:
+  n^3 coefficient: 2.651712e-10
+  n^2 coefficient: 9.733364e-07
+  n coefficient: 2.087709e-62
+  constant: 4.146909e-06
+  R2 value: 0.999436
+  Estimated n^3 operations: ~263
+
+m=7:
+  n^3 coefficient: 1.010208e-09
+  n^2 coefficient: 8.076605e-06
+  n coefficient: 9.313358e-70
+  constant: 1.609927e-06
+  R2 value: 0.992831
+  Estimated n^3 operations: ~1004
+
+Assemble Times Analysis:
+--------------------------------------------------
+m=4:
+  n^3 coefficient: 1.873752e-12
+  n^2 coefficient: 1.489889e-08
+  n coefficient: 1.217300e-35
+  constant: 4.701927e-08
+  R2 value: 0.999189
+  Estimated n^3 operations: ~2
+
+m=5:
+  n^3 coefficient: 1.750884e-12
+  n^2 coefficient: 1.614203e-08
+  n coefficient: 2.806687e-46
+  constant: 6.242006e-07
+  R2 value: 0.999251
+  Estimated n^3 operations: ~2
+
+m=6:
+  n^3 coefficient: 1.744757e-12
+  n^2 coefficient: 1.629140e-08
+  n coefficient: 3.459160e-15
+  constant: 9.686915e-07
+  R2 value: 0.999425
+  Estimated n^3 operations: ~2
+
+m=7:
+  n^3 coefficient: 1.581335e-12
+  n^2 coefficient: 1.787869e-08
+  n coefficient: 7.938039e-15
+  constant: 6.093125e-06
+  R2 value: 0.999530
+  Estimated n^3 operations: ~2
+

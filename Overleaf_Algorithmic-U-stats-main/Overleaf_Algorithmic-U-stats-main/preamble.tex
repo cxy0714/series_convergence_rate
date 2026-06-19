@@ -1,0 +1,182 @@
+% \usepackage[utf8]{inputenc} 
+\usepackage[T1]{fontenc}   
+\usepackage{lmodern}
+\usepackage{fullpage}
+\usepackage{color, graphicx}
+\usepackage{setspace}
+\usepackage{epstopdf}
+\usepackage{amsmath, amsfonts, amsthm, amssymb, bm, bbm, mathtools, mathrsfs}
+\usepackage{dsfont}
+\usepackage{scalerel}
+\usepackage{verbatim}
+
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{tabu}
+
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+
+\usepackage[round]{natbib}
+\usepackage{xr,xspace}
+
+\usepackage{xcolor}
+
+\newcommand{\red}{\color{red}}
+\newcommand{\blue}{\color{blue}}
+\newcommand{\green}{\color{green!60!black}}
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+\definecolor{chicago-maroon}{RGB}{128,0,0}
+
+\usepackage[bookmarks, colorlinks=true, plainpages=false, 
+            citecolor=darkblue, linkcolor=chicago-maroon, 
+            anchorcolor=red, urlcolor=teal]{hyperref}
+\usepackage[nameinlink]{cleveref}
+\usepackage{prettyref}
+            
+\usepackage{url}
+\urlstyle{rm}
+
+\usepackage{etoolbox}
+\usepackage{appendix}
+\usepackage{enumitem}
+\usepackage{caption,subcaption}
+\usepackage{soul}
+\usepackage{romanbar}
+\usepackage{todonotes}
+\usepackage{tcolorbox}
+\usepackage{namedtensor}
+
+% \usepackage{almendra}
+
+\usepackage{authblk}
+
+\usepackage{pgf,tikz}
+
+\usepackage{float}
+\usetikzlibrary{arrows,arrows.meta,shapes.arrows,shapes.geometric,shapes.multipart,fit,automata,decorations.pathmorphing,positioning,shapes.swigs}
+\tikzset{
+	%Define standard arrow tip
+	>=stealth',
+	%Define style for boxes
+	true/.style={
+		rectangle,
+		draw=black, very thick,
+		text width=6.5em,
+		minimum height=2em,
+		text centered,
+		fill=gray, opacity = 0.5},
+	punkt/.style={
+		rectangle,
+		rounded corners,
+		draw=black, very thick,
+		text width=6.5em,
+		minimum height=2em,
+		text centered},
+	est/.style={
+		circle,
+		draw=black, very thick,
+		text centered},
+	shade/.style={
+		circle,
+		draw=black, very thick, fill=gray!50,
+		text centered},
+	weight/.style={
+		circle,
+		draw=black, very thick,
+		text width=6.5em,
+		minimum height=2em,
+		text centered},
+	% Define arrow style
+	pil/.style={
+		->,
+		thick,
+		shorten <=2pt,
+		shorten >=2pt,},
+	double/.style={
+		<->,
+		thick,
+		shorten <=2pt,
+		shorten >=2pt,},
+	dash/.style={
+		dashed,
+		thick,
+		shorten <=2pt,
+		shorten >=2pt,},
+	dashdouble/.style={
+		<->,
+		dashed,
+		thick,
+		shorten <=2pt,
+		shorten >=2pt,}
+}
+
+\usepackage{tikz-cd}
+\makeatletter 
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+
+\usepackage{fancyhdr}
+\usepackage{microtype} 
+\providecommand{\keywords}[1]{\textbf{Keywords:} #1}
+
+\newcommand{\myreferences}{Master.bib}
+\newcommand{\myreferencesapp}{Master.bib}
+
+\newcommand{\bbN}{{\mathbb{N}}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{observation}{Observation}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{hypothesis}{Hypothesis}
+\newtheorem{assumption}{Assumption}
+\newtheorem{condition}{Condition}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{problem}{Problem}
+\newtheorem{question}{Question}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem*{remark*}{Remark}
+
+\newcommand{\bbX}{{\mathbb{X}}}
+
+\newcommand{\calA}{{\mathcal{A}}}
+\newcommand{\calB}{{\mathcal{B}}}
+\newcommand{\calC}{{\mathcal{C}}}
+\newcommand{\calD}{{\mathcal{D}}}
+\newcommand{\calE}{{\mathcal{E}}}
+\newcommand{\calF}{{\mathcal{F}}}
+\newcommand{\calG}{{\mathcal{G}}}
+\newcommand{\calH}{{\mathcal{H}}}
+\newcommand{\calI}{{\mathcal{I}}}
+\newcommand{\calJ}{{\mathcal{J}}}
+\newcommand{\calK}{{\mathcal{K}}}
+\newcommand{\calL}{{\mathcal{L}}}
+\newcommand{\calM}{{\mathcal{M}}}
+\newcommand{\calN}{{\mathcal{N}}}
+\newcommand{\calO}{{\mathcal{O}}}
+\newcommand{\calP}{{\mathcal{P}}}
+\newcommand{\calQ}{{\mathcal{Q}}}
+\newcommand{\calR}{{\mathcal{R}}}
+\newcommand{\calS}{{\mathcal{S}}}
+\newcommand{\calT}{{\mathcal{T}}}
+\newcommand{\calU}{{\mathcal{U}}}
+\newcommand{\calV}{{\mathcal{V}}}
+\newcommand{\calW}{{\mathcal{W}}}
+\newcommand{\calX}{{\mathcal{X}}}
+\newcommand{\calY}{{\mathcal{Y}}}
+\newcommand{\calZ}{{\mathcal{Z}}}
+
+\newcommand{\bbR}{{\mathbb{R}}}
+\newcommand{\reals}{{\mathbb{R}}}
+\newcommand{\naturals}{\mathbb{N}}
+\newcommand{\positivenaturals}{\mathbb{N}^+}
+

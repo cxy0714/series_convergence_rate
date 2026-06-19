@@ -1,0 +1,515 @@
+\documentclass[12pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Self-contained preamble for the response letter.
+% NOTE: This file is meant to be compiled with the working directory at the
+% PROJECT ROOT (this is what Overleaf does), so that Master.bib is found and the
+% cross-references to the manuscript resolve.  See \externaldocument below.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{setspace}
+\oddsidemargin = 0pt
+\textwidth = 470pt
+\textheight = 630pt
+\topmargin = -10pt
+\headheight = -10pt
+\renewcommand{\baselinestretch}{1.5}
+\onehalfspacing
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage[mathcal]{euscript}   % match the manuscript's \mathcal font
+\usepackage{enumitem}
+\usepackage{makecell}
+\usepackage{graphicx}            % so figures from the manuscript can be reused here
+\usepackage{tikz}                % so TikZ pictures from the manuscript can be reused here
+\usetikzlibrary{arrows.meta, positioning, decorations.pathreplacing, calc}
+
+\usepackage{xcolor}
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+\definecolor{chicago-maroon}{RGB}{128,0,0}
+
+\usepackage[justification=centering]{caption}
+\usepackage{subcaption}          % so sub-figures from the manuscript can be reused here
+\usepackage[normalem]{ulem}      % \sout for \Del (quoting text deleted from the manuscript)
+
+\usepackage[round]{natbib}       % for \citep / \citet in the replies
+
+\usepackage[bookmarks, colorlinks=true, plainpages=false,
+            citecolor=darkblue, linkcolor=teal, anchorcolor=red,
+            urlcolor=chicago-maroon]{hyperref}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Cross-references INTO the revised manuscript (ustats_revision.tex), via xr.
+% This lets a reply write e.g. ``see Definition~\ref{def:mul_decomp}'' and have
+% the number resolve to the one actually printed in the manuscript.
+%
+% HOW IT WORKS (works on Overleaf with no manual step)
+%   * Overleaf does not, in general, make a non-main document's .aux available
+%     to another document's compile, so plain xr would print ``??''.  To avoid
+%     that, the references resolve from a committed label snapshot,
+%       Statistics_and_computing_submission/ustats_revision_labels.aux,
+%     which is part of the repo and is therefore always found.
+%   * If you DO compile ustats_revision.tex as the main document, its fresh
+%     .aux is preferred automatically, so the numbers stay current.
+%   * Refresh the snapshot whenever the manuscript numbering changes: recompile
+%     ustats_revision.tex and copy its \newlabel lines into the snapshot file
+%     (its header explains this; locally: grep '^\newlabel' ustats_revision.aux).
+%
+% USAGE -- type the leading word yourself, then \ref{}, for example:
+%   Section~\ref{sec:alg_u_v}                 Example~\ref{eg:running}
+%   Definition~\ref{def:mul_decomp}           Remark~\ref{rem:tw}
+%   Definition~\ref{def:treewidth_elimination}
+%   Proposition~\ref{pro:complexity_einsum}   Figure~\ref{fig:decomp_graph_AS}
+%   Table~\ref{tab:triangle_counting_gpu}     Observation~\ref{obs:HOIF}
+% (A short live demonstration appears just after \maketitle below.)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{xr-hyper}
+\IfFileExists{ustats_revision.aux}{%
+  \externaldocument{ustats_revision}%                          % fresh aux (root)
+}{\IfFileExists{Statistics_and_computing_submission/ustats_revision.aux}{%
+  \externaldocument{Statistics_and_computing_submission/ustats_revision}% fresh aux (subfolder)
+}{%
+  \externaldocument{Statistics_and_computing_submission/ustats_revision_labels}% committed snapshot
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Response-letter helpers
+\newcommand{\Res}[1]{{\color{darkblue}{#1}}}   % our response text (optional)
+% Marker that begins each of our replies; type the reply right after it.
+\newenvironment{reply}{\par\smallskip\noindent\color{blue}Reply:\ \ignorespaces}{\par}
+\newenvironment{todo}{\par\smallskip\noindent\color{red}Todo:\ \ignorespaces}{\par}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Macros imported from the manuscript (ustats_revision.tex) preamble, so the
+% replies can reuse the manuscript's notation directly (\opteinsum, \package,
+% \Einsum, \treewidth, ...).  \libref -- on which \opteinsum and friends depend
+% -- is defined here; that definition was what was missing before, which is why
+% \opteinsum{} failed to compile.  Keep this block in sync with
+% ustats_revision.tex when new macros are added there.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\pdfu}{\texorpdfstring{$U$}{U}}
+\newcommand{\pdfv}{\texorpdfstring{$V$}{V}}
+\newcommand{\libref}[2]{\href{#2}{\texttt{#1}}}
+
+% theorem-like environments (numbered independently of the manuscript)
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{observation}{Observation}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{hypothesis}{Hypothesis}
+\newtheorem{assumption}{Assumption}
+\newtheorem{condition}{Condition}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{problem}{Problem}
+\newtheorem{question}{Question}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem*{remark*}{Remark}
+\newtheorem{subexample}{Example}
+\renewcommand{\thesubexample}{\theexample(\alph{subexample})}
+
+\def\tilde{\widetilde}
+\def\Einsum{\textsc{Einsum}}
+\newcommand{\mobius}{M\"obius}
+
+% code libraries
+\def\package{\libref{u-stats}{https://github.com/zrq1706/U-Statistics-Python}}
+\def\igraph{\libref{igraph}{https://igraph.org/}}
+\def\peregrine{\libref{Peregrine}{https://github.com/pdclab/peregrine}}
+\def\cugraph{\libref{cuGraph}{https://docs.rapids.ai/api/cugraph/stable/}}
+\newcommand{\numpy}{\libref{numpy}{https://numpy.org/}}
+\newcommand{\torch}{\libref{pytorch}{https://pytorch.org/}}
+\newcommand{\numpyeinsum}{\libref{numpy.einsum}{https://numpy.org/doc/2.1/reference/generated/numpy.einsum.html}}
+\newcommand{\torcheinsum}{\libref{pytorch.einsum}{https://pytorch.org/docs/stable/generated/torch.einsum.html}}
+\newcommand{\opteinsum}{\libref{opt-einsum}{https://dgasmith.github.io/opt_einsum/}}
+
+% simplified commands
+\newcommand{\wt}{\overline}
+\newcommand{\sPi}{\pi}
+\newcommand{\sper}{\sigma}
+
+% HOIF
+\newcommand{\IF}{\mathbb{IF}}
+\newcommand{\BD}{\mathbb{BD}}
+\newcommand{\factorial}[1]{#1\mathpunct{!}}
+
+% statistics notations
+\newcommand{\uset}{\calU}
+\newcommand{\usetnm}[2]{\uset\left(#1,#2\right)}
+\newcommand{\vset}{\calV}
+\newcommand{\vsetp}[2]{\vset(#1,#2)}
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\ustath}[1]{\mathbb{U}(#1)}
+\newcommand{\ustatp}[2]{\ustat(#1,#2)}
+\newcommand{\vstatp}[2]{\vstat(#1,#2)}
+\def\sfr{\mathsf{r}}
+
+% set notations
+\newcommand{\samplespace}{\bbX}
+\newcommand{\takesetp}[1]{\mathsf{set}(#1)}
+\newcommand{\taketuplep}[1]{\mathsf{tuple}\left( #1 \right)}
+\newcommand{\cartesianprod}{\bigotimes}
+
+% combinatoric notations
+\newcommand{\perm}[1]{\mathsf{Perm}(#1)}
+\newcommand{\partition}{\Pi}
+\newcommand{\partitionp}[1]{\partition_{#1}}
+\newcommand{\finest}{\mathsf{Fin}}
+\newcommand{\finestp}[1]{\finest[#1]}
+\newcommand{\coarsest}{\mathsf{Coa}}
+\newcommand{\coarsestp}[1]{\coarsest[#1]}
+\newcommand{\cover}{\mathcal{C}}
+\newcommand{\stirling}{\calS}
+\newcommand{\stirlingp}[2]{\stirling(#1,#2)}
+
+% tensor notations
+\newcommand{\ndim}{\mathsf{ndim}}
+\newcommand{\ndimp}[1]{\ndim(#1)}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\dimp}[2]{\dim[#1](#2)}
+\newcommand{\indexset}{\textsc{Indices}}
+\newcommand{\teq}{\overset{\mathrm{t.e.}}{=}}
+\newcommand{\canonicalform}{\mathsf{canonical}}
+\newcommand{\tensorcontraction}{\textsc{Einsum}}
+
+% partial order on partitions
+\newcommand{\pleq}{\preceq}
+\newcommand{\pgeq}{\succeq}
+\newcommand{\pless}{\prec}
+\newcommand{\pgreater}{\succ}
+
+% graph notations
+\newcommand{\degp}[2]{\deg(#1,#2)}
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesp}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesp}[1]{E(#1)}
+\newcommand{\neighborvg}[2]{N_{#2}(#1)}
+\newcommand{\treewidth}{\mathsf{tw}}
+\newcommand{\treewidthp}[1]{\mathsf{tw}(#1)}
+\newcommand{\quotientgraphgpi}[2]{#1/#2 }
+\newcommand{\quotientgraphp}[1]{\mathcal{Q}(#1)}
+\newcommand{\graphset}{\mathcal{G}}
+\newcommand{\graphsetne}[2]{\graphset_{#1,#2}}
+\newcommand{\degeneracy}{D}
+\newcommand{\degeneracyg}[1]{\degeneracy(#1)}
+\newcommand{\completegraphp}[1]{K_{#1}}
+\newcommand{\motifrg}[2]{\mathsf{C}(#1,#2)}
+\newcommand{\graphform}[1]{G_{#1}}
+
+% O-notations
+\newcommand{\greater}{\Omega}
+\newcommand{\less}{O}
+\newcommand{\muchgreater}{\omega}
+\newcommand{\muchless}{o}
+\newcommand{\appequal}{\Theta}
+
+% operators / misc
+\newcommand{\eliminatevg}[2]{\mathsf{elim}_{#1}(#2)}
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\mse{\mathsf{mse}}
+\newcommand{\Lin}[1]{{\color{purple}{#1}}}
+\newcommand{\rev}[1]{{\color{red}{#1}}}   % text added/changed in the manuscript (same name there)
+\newcommand{\del}[1]{{\color{red}\sout{#1}}} % text deleted from the manuscript (same name there)
+
+% number sets
+\newcommand{\bbR}{{\mathbb{R}}}
+\newcommand{\reals}{{\mathbb{R}}}
+\newcommand{\naturals}{\mathbb{N}}
+\newcommand{\positivenaturals}{\mathbb{N}^+}
+\def\bbX{\mathbb{X}}
+
+% calligraphic letters (full alphabet, so any \cal? used by the manuscript works)
+\def\calA{\mathcal{A}} \def\calB{\mathcal{B}} \def\calC{\mathcal{C}}
+\def\calD{\mathcal{D}} \def\calE{\mathcal{E}} \def\calF{\mathcal{F}}
+\def\calG{\mathcal{G}} \def\calH{\mathcal{H}} \def\calI{\mathcal{I}}
+\def\calJ{\mathcal{J}} \def\calK{\mathcal{K}} \def\calL{\mathcal{L}}
+\def\calM{\mathcal{M}} \def\calN{\mathcal{N}} \def\calO{\mathcal{O}}
+\def\calP{\mathcal{P}} \def\calQ{\mathcal{Q}} \def\calR{\mathcal{R}}
+\def\calS{\mathcal{S}} \def\calT{\mathcal{T}} \def\calU{\mathcal{U}}
+\def\calV{\mathcal{V}} \def\calW{\mathcal{W}} \def\calX{\mathcal{X}}
+\def\calY{\mathcal{Y}} \def\calZ{\mathcal{Z}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\title{Responses to Referees' Reports}
+\date{}
+\author{}
+\maketitle
+
+\vspace{-4em}
+
+
+\textbf{On the revision of ``On computing and the complexity of
+computing higher-order $U$-statistics, exactly'' submitted to \emph{Statistics and Computing}}. \\
+
+Dear Prof. Ajay Jasra, \\
+
+We are grateful to you for providing us with the opportunity to revise and resubmit our manuscript. We also sincerely thank the two anonymous referees for their constructive comments and feedback. In this revision, we have made the following changes:
+\begin{enumerate}
+\item \emph{[Summary of the main changes will be added here.]}
+\end{enumerate}
+All major changes are highlighted in {\color{red}red} in the revised manuscript for ease of reference. We have addressed all the comments raised by the two referees, with our point-by-point responses detailed below. We hope that our manuscript is now in a form suitable for publication in \emph{Statistics and Computing}.
+
+\newpage
+
+\section*{Response to Referee 1}
+
+\subsection*{Summary and overall assessment}
+
+\emph{This paper proposes efficient and exact methods for computing $V$-statistics and $U$-statistics using Einstein summation. It also provides a theoretical characterization of the time complexity under idealized assumptions, together with several examples illustrating applications of the proposed approach.}
+
+\emph{Overall, I find the topic relevant and potentially useful, especially given the growing use of $U$-statistics in modern statistical applications. However, my impression is that the paper currently reads primarily as an application and review of existing Einsum-based operations and time-complexity analyses in the context of computing statistical quantities. To broaden the paper's practical impact, I encourage the authors to clarify the computational details and provide more intuitive examples for the abstract concepts introduced throughout the paper. Doing so would make the general procedure more accessible and would likely encourage broader use beyond the specific examples discussed.}
+
+\emph{In particular, several concepts are currently presented in a rather abstract way without sufficiently concrete examples immediately following the definitions. I believe that making the exposition easier to follow would substantially increase the paper's impact.}
+
+\emph{Regarding the characterization of optimal time complexity, it would be helpful to clarify what new techniques, conclusions, or insights the paper contributes relative to the existing literature on Einsum operations and algorithmic time complexity. My current impression, based on the main text, is that many of the general concepts are already well established in the literature on algorithmic complexity, whereas the specific statistical examples may not have been explicitly discussed before. If the paper contains additional new insights, I encourage the authors to highlight them more clearly.}
+
+\emph{In summary, I think this paper would be most useful if it were written for statisticians who work with $U$-statistics but may not have prior background in the Einsum operator or tensor-based algorithms. A more straightforward and accessible explanation of the efficient computation strategy would make the paper more useful and impactful than a primarily theoretical discussion of optimal time complexity, especially when it is unclear how that optimal complexity is achieved in practice. My specific comments are detailed below.}
+
+\begin{todo}
+\emph{``I encourage the authors to clarify the computational details and provide
+more intuitive examples for the abstract concepts introduced throughout the
+paper'':} 
+
+add an intuitive sketch of the proof that characterises the
+computational complexity in terms of treewidth, reusing the slide figure that
+illustrates vertex elimination together with its associated complexity
+(decomposition) graph; and add worked examples immediately after the relevant
+definitions.
+
+\emph{``In particular, several concepts are currently presented in a rather
+abstract way without sufficiently concrete examples immediately following the
+definitions'':} 
+
+add a concrete worked example right after each definition.
+
+\emph{``Regarding the characterization of optimal time complexity, it would be
+helpful to clarify what new techniques, conclusions, or insights the paper
+contributes relative to the existing literature on Einsum operations and
+algorithmic time complexity'':}
+
+explain that our characterisation of the optimal
+time complexity is a modest extension of \citet{markov2008simulating}. Unlike
+\citet{markov2008simulating}, who rely on a tree-decomposition-based definition
+of treewidth, we use the equivalent vertex-elimination-based definition, which
+yields a more accessible proof. Moreover, our argument is phrased
+for an \emph{index-wise} algorithm, whereas practical \Einsum{} implementations
+operate \emph{tensor-wise}; we can show that the tensor-wise and index-wise
+algorithms attain the same optimal complexity, a point not made explicit in the
+existing literature.
+
+\emph{``A more straightforward and accessible explanation of the efficient
+computation strategy would make the paper more useful and impactful than a
+primarily theoretical discussion of optimal time complexity, especially when it
+is unclear how that optimal complexity is achieved in practice'':} 
+
+as above,
+clarify the gap between the tensor-wise and index-wise algorithms, and emphasise
+that our software can pre-compute the cost under different state-of-the-art
+contraction-ordering heuristics exposed by \opteinsum{} (illustrated with the
+HOIF example). Finding the truly optimal \Einsum{} contraction ordering is beyond
+our scope; we point interested readers to, e.g., \citet{gray2021hyper}.
+\end{todo}
+\begin{reply}
+[PARTIAL] Done: intuitive proof sketch of the treewidth characterisation
+  (two new paragraphs + Figure~\ref{fig:elimination_sketch} after
+  Proposition~\ref{pro:complexity_einsum}) -- this answers the ``reuse the
+  slide figure'' part.
+% Pending: (a) worked examples after each definition (Items 9, 10, 11, 13
+%   drafted in the staging file, awaiting review); (b) novelty vs.
+%   Markov & Shi (2008); (c) tensor-wise vs index-wise discussion (R1.4).
+\end{reply}
+
+\subsection*{Major comments}
+
+\begin{enumerate}
+
+\item In Section~\ref{sec:alg_v} (Section~3.2), the discussion of computational cost appears to focus mainly on Algorithm~\ref{alg:v_stats} (Algorithm~2), namely the Einsum operation, while the cost of Algorithm~\ref{alg:tensorization} (Algorithm~1) seems to be largely omitted. 
+
+\begin{reply}
+We thank the reviewer for pointing this out. We agree that the previous discussion focused mainly on the \Einsum{} operation in Algorithm~\ref{alg:v_stats}. We have added Remark~\ref{rem:complexity_tensorization} to explicitly discuss the computational cost of Algorithm~\ref{alg:tensorization}. In particular, we show that the tensorization step has complexity
+\begin{equation*}
+    O\Bigg(\sum_{k=1}^K n^{|A_k|}\Bigg) 
+    = O\Big(K n^{m_{\max}}\Big),
+\end{equation*}
+where $|A_k|$ is the number of the arguments of the factor $h_k$ and $m_{\max} = \max_{k\in[K]} |A_k|$.
+
+Since each factor corresponds to a clique in the decomposition graph defined in Definition~\ref{def:graph_decomp}, we have $m_{\max} \leq \operatorname{tw}(G) + 1$.
+Therefore, following Proposition~\ref{pro:complexity_einsum}, the tensorization step does not dominate computing $U$-/$V$-statistics.
+\end{reply}
+
+
+Moreover, on Page~6 (Page~6), Definition~\ref{def:tensors} (Definition~3) states that ``there is no time complexity to access an entry in $T$, i.e., to evaluate $T$ on $\alpha$.'' Is this intended as a theoretical assumption, or is it meant to hold in practice? It would be helpful to explain why the complexity of querying entries of large tensors can be ignored.
+
+\begin{reply}
+    We thank the reviewer for raising this point. The statement is intended as a theoretical convention for our complexity analysis, not as a claim that tensor entries can be retrieved at no physical cost in an implementation. In this paper, we measure computational complexity by counting float-point operations over real numbers, such as additions and multiplications. The cost of indexing and accessing an already specified tensor entry T($\alpha$) is not included in this float-point operation count.
+    
+    This convention is used to standardize the complexity discussion and to distinguish tensors from general functions. Throughout this paper, we also view a tensor as a map, rather than merely as a data structure, in order to facilitate the formalization of our theoretical results. Although a tensor can be formally viewed as a map $T:[n]^m\to\mathbb{R}$, evaluating a general map at $\alpha$ may itself require nontrivial computation, whereas accessing an entry of an explicitly represented tensor is treated as direct data access. We agree that the original wording “there is no time complexity” may be misleading, and we will revise it to state explicitly that entry-access costs are ignored in our complexity discussion. We add the explanation following Definition~\ref{def:tensors}. 
+
+    For the cost of querying entries of large tensors, entry-access costs are outside the scope of our float-point operation complexity analysis. While in practice large tensors may incur memory access costs, in our theoretical model we focus solely on the number of float-point operations.
+\end{reply}
+
+\item On Page~7 (Page~7), Definitions~\ref{def:tensor_expression}--\ref{def:tensor_contraction} (Definitions~4--5) introduce the general Einsum notation and operation using an input tuple list $\mathcal{A}$ and an output tuple $B$. However, the role of the output tuple $B$ is not immediately clear. In the main examples, it appears that only the case $B = \emptyset$ is used.
+\begin{enumerate}
+\item I noticed that additional examples with $B \neq \emptyset$ are provided in Appendix~\ref{app:examples} (Appendix~A). It would be helpful to explicitly mention in the main text that Example~\ref{eg:running} (Example~1) illustrates the case $B = \emptyset$, while additional examples with $B \neq \emptyset$ are given in Appendix~\ref{app:examples} (Appendix~A). At present, the main text does not clearly highlight the new information provided in the appendix.
+
+% \begin{todo}
+%     Clear todo: state explicitly in the main text that Example~\ref{eg:running} illustrates the case $B = \emptyset$, and that the examples with $B \neq \emptyset$ are given in Appendix~\ref{app:examples}.
+% \end{todo}
+
+\begin{reply}
+We agree and have added a clarifying passage immediately after Definition~\ref{def:tensor_contraction} and before Example~\ref{eg:running}. It now states explicitly that Example~\ref{eg:running} illustrates the case $B = \emptyset$, in which the output is a scalar --- the case used throughout the main text, since the $V$-statistics under consideration are scalar-valued. The passage also explains why the general case $B \neq \emptyset$ is nevertheless indispensable: the proof of Proposition~\ref{pro:complexity_einsum} in Appendix~\ref{app:complexity_einsum} computes a $V$-statistic by eliminating one index at a time, and each intermediate step of this procedure is itself an \Einsum{} operation with a non-empty output tuple. Finally, it points the reader to the two further examples with $B \neq \emptyset$ (matrix multiplication and a partial trace over higher-order tensors) in Appendix~\ref{app:examples}.
+\end{reply}
+\item In Appendix~\ref{app:examples} (Appendix~A), the labels ``Example~\ref{eg:matrix multiplication}'' and ``Example~\ref{eg:tensor}'' (``Example~2'' and ``Example~3'') conflict with examples in the main text. These could be renamed as Examples A.2 and A.3, or Examples S.2 and S.3, to avoid confusion.
+
+% \begin{todo}
+%     Clear todo: rename the appendix examples (currently Example~\ref{eg:matrix multiplication} and Example~\ref{eg:tensor}) so that they no longer collide with the main-text numbering, e.g.\ as Examples~A.2 and~A.3.
+% \end{todo}
+
+\begin{reply}
+Thank you for the suggestion. The appendix examples are now numbered with the section prefix and read Example~\ref{eg:matrix multiplication} and Example~\ref{eg:tensor}, no longer clashing with the main text.
+\end{reply}
+
+\end{enumerate}
+
+\item On Page~14 (Page~14), Proposition~\ref{pro:complexity_einsum} (Proposition~1) characterizes the time complexity in terms of $\mathsf{tw}(G_{\mathcal{A}})$. However, it is still unclear to me what $\mathsf{tw}(G_{\mathcal{A}})$ would be in simple examples. I suggest adding simple examples to illustrate this quantity and explain how it is computed from the definitions.
+
+\begin{todo}
+    Clear todo: add simple worked examples illustrating $\mathsf{tw}(G_{\mathcal{A}})$ in Proposition~\ref{pro:complexity_einsum} and showing how it is computed from the definitions.
+\end{todo}
+\begin{reply}
+Partial done:
+
+This is a helpful suggestion. We have added the following material immediately after Proposition~\ref{pro:complexity_einsum}. (i) Two short paragraphs sketching the proof: summing an \Einsum{} expression over one index $x$ costs $\less(|\calA|\, n^{\degp{x}{G_{\calA}}+1})$ time and $n^{\degp{x}{G_{\calA}}}$ storage, and this partial summation transforms the decomposition graph exactly as the vertex elimination of Definition~\ref{def:treewidth_elimination}. (ii) A new figure (Figure~\ref{fig:elimination_sketch}) visualizing this correspondence on the \Einsum{} notation $\calA = ((1,2),(2,1),(1,3))$ of Figure~\ref{fig:graph_hoif_4_2}: the two branches contrast eliminating the central vertex first ($\less(n^3)$, with a fill-in edge) against the optimal ordering $\sigma = (2,1,3)$ ($\less(n^2)$), from which $\treewidthp{G_{\calA}} = 1$ and the exponent $\treewidthp{G_{\calA}}+1 = 2$ of Proposition~\ref{pro:complexity_einsum} are read off directly. (iii) A worked example computing $\treewidthp{G_{\calA}}$ from the definition for three decomposition graphs that recur later in the paper: the chain of the running example ($\treewidthp{} = 1$, complexity $\less(n^2)$ vs.\ the brute-force $\less(n^4)$), the complete graph $\completegraphp{4}$ of the motif-counting application ($\treewidthp{\completegraphp{m}} = m-1$, no improvement over brute force), and the two disjoint edges of the distance-covariance application ($\treewidthp{} = 1$).
+% [STATUS: paragraphs + figure finalized in chat; subexample (iii) drafted but
+%  pending the agreed slimming of part (i) -- finalize before submitting.]
+\end{reply}
+
+\item On Page~14 (Page~14), Remark~\ref{rem:ordering} (Remark~3) discusses the difficulty of finding an ordering corresponding to the treewidth in practice. After reading this remark, it is unclear what ``real'' time complexity one should expect in practice, as opposed to the optimal theoretical complexity. It would be useful to clarify how well existing packages approximate the optimal ordering and how much inefficiency might arise in practice.
+
+The paper mentions two strategies, greedy search and exhaustive search. Which of these is preferable in terms of approximating the optimal ordering? Some guidance on their relative advantages and limitations would be helpful.
+
+Remark~\ref{rem:ordering} (Remark~3) also mentions that \citet{zhang2025adaptive} (Zhang et al.\ 2025) used dynamic programming. How does the implementation in the present paper differ from that of \citet{zhang2025adaptive} in order to accelerate the computation? Is dynamic programming avoided, or is the computational gain primarily due to sparsification in Section~\ref{sec:alg_u} (Section~3.3)? This distinction is currently unclear.
+
+\begin{todo}
+    On the gap between optimal and ``real'' complexity: as in the summary, make explicit the two regimes in our analysis --- the index-wise (theoretical) ordering and the tensor-wise (practical) ordering --- and use the HOIF table to report the ``real'' complexity achieved in practice. Quantifying exactly how much inefficiency arises in general is beyond our scope.
+
+    On greedy vs.\ exhaustive search: add a short remark (or a small experiment over the three examples) comparing the time needed to \emph{find} the ordering with the FLOPs needed to \emph{execute} it.
+
+    On the comparison with \citet{zhang2025adaptive}: clarify the relation to their dynamic-programming approach. Note that this is not one of the algorithms we already subsume as special cases in the appendix (those are \citet{he2021asymptotically} and \citet{lai2023block}); since \citet{zhang2025adaptive} also discusses computing $U$-statistics at length, we should read it carefully and add the comparison.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\item On Page~15 (Page~15), Definition~\ref{def:v_set} (Definition~11) introduces a partition $\pi$. What exactly does the partition $\pi$ do, and what does $Q \in \pi$ mean in this context? It would be helpful to include simple examples illustrating these definitions.
+
+Similarly, on Page 16 (Page~16), the paper states that ``$\mathcal{A}_\pi$ simply identifies all the indices that happen to belong to the same subset of the partition $\pi$. The procedure is presented in Algorithm~\ref{alg:induced_expression} (Algorithm~3).'' The general description is difficult to interpret without a concrete example. I suggest adding a small example that walks through the construction step by step.
+
+On Pages 17--18 (Pages~17--18), Remark~\ref{rem:sparsification_terms_revised} (Remark~4) is also difficult to follow. In particular, it is unclear how to interpret equation~\eqref{eq:quotient_set} (equation~(4)) and how the stated conclusion follows. Additional explanation or examples would make this part much clearer.
+
+\begin{todo}
+    Clear todos (all ask for concrete examples):
+    \begin{enumerate}
+        \item illustrate the partition $\pi$ and the meaning of $Q \in \pi$ right after Definition~\ref{def:v_set};
+        \item add a small worked example for Algorithm~\ref{alg:induced_expression} (constructing $\mathcal{A}_\pi$) that walks through the construction step by step;
+        \item expand Remark~\ref{rem:sparsification_terms_revised}, explaining how to read equation~\eqref{eq:quotient_set} and how the stated conclusion follows.
+    \end{enumerate}
+\end{todo}
+\begin{reply}      \end{reply}
+
+\item On Page 19 (Page~19), Remark~\ref{rem:U-complexity} (Remark~5) states that ``$N_l$ and $M$ can in principle be computed for concrete examples.'' It would be useful to explain how this computation is performed in practice, perhaps through a simple example or a brief algorithmic description.
+
+\begin{todo}
+    Computing $N_l$ and $M$ exactly is hard in practice; Remark~\ref{rem:U-complexity} is included mainly to control the asymptotics of $N_l$ (which is bounded by a function of $m$, when $m$ is going infnity with $n$, it may become Leading item  ). In practice they can only be approximated, since computing the exact treewidth is itself hard. Possible additions: an experiment extending the HOIF table, and a complete worked calculation for the distance-covariance (dcov) case, which cane exact computed since they are in easy case.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\item On Page 21 (Page~21), the last two lines state: ``Then obviously $h^{(m)}_j$ allows for an MD structure, by letting $f_l(X_1, X_2) := A_1\phi(Z_1)^{\top} A_2\phi(Z_2)$ for $l < j$ and $f_j(X_1, X_2) := A_1\phi(Z_1)^{\top} \phi(Z_2) Y_2$. The corresponding decomposition signature of $h^{(m)}_j$ is $((i, i+1))_{i=1}^{j-1}$.'' This explanation would be clearer if it were matched more explicitly to the notation introduced earlier. For example, what do $\mathcal{A} = \{A_1, \ldots, A_k\}$ and $h_k(\cdot)$ in Definition~\ref{def:mul_decomp} (Definition~9) correspond to in this example?
+
+On Page 22 (Page~22), the paper states that ``the computational complexity up to order $m = 12$ is analyzed in Observation~\ref{obs:HOIF} (Observation~2) in Appendix~\ref{app:HOIF} (Appendix~G).'' Why is the analysis restricted to $m \leq 12$? What is the intuition behind the derivation of Observation~\ref{obs:HOIF} (Observation~2)? Is there an approximate upper bound, say $M(m)$, that could help readers understand how the problem complexity scales with $m$? Some intuitive explanation would be helpful.
+\begin{todo}
+    Clear todo: relate the example explicitly to the earlier notation --- spell out what $\mathcal{A} = \{A_1, \ldots, A_k\}$ and $h_k(\cdot)$ of Definition~\ref{def:mul_decomp} are in this HOIF example.
+
+    For the second part: add a statement giving the intuition behind Observation~\ref{obs:HOIF} --- why the analysis stops at $m = 12$, and whether an approximate upper bound $M(m)$ can describe how the complexity scales with $m$.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\end{enumerate}
+
+\subsection*{Minor comments}
+
+\begin{enumerate}
+\setcounter{enumi}{7}
+
+\item On Page 8 (Page~8), Example~\ref{eg:running} (Example~1) states: ``The last example that we consider \ldots'' What does ``last example'' refer to here? Is this a typo?
+
+\begin{reply}
+Thank you --- this was indeed a typo. It now reads ``The running example that we consider in the main text \ldots''.
+\end{reply}
+
+\item On Page 10 (Page~10), Definition~\ref{def:mul_decomp} (Definition~9), how should one interpret the double superscript notation ``$\in [m]^{**}$''?
+
+\begin{reply}
+We thank the referee for the careful reading. The double-superscript notation $[m]^{**}$ --- denoting tuples whose entries are themselves index tuples over $[m]$, i.e. $([m]^{*})^{*}$ --- was a leftover from an earlier version of the manuscript, and this was in fact its only occurrence in the entire paper. Since the condition it encodes is nothing more than that each $A_k$ is an index tuple, we have removed this notation altogether and restated Definition~\ref{def:mul_decomp} using the same notation as in Definition~\ref{def:tensor_expression}: $\calA \coloneqq (A_k)_{k=1}^{K}$ with $A_k \in [m]^{*}$ for each $k \in [K]$. The notation is now consistent throughout the paper.
+\end{reply}
+
+\end{enumerate}
+
+\newpage
+
+
+\section*{Response to Referee 2}
+
+\subsection*{Summary and overall assessment}
+
+\emph{This paper studies the exact computation of higher-order $U$-statistics through a tensor-based framework. By decomposing $U$-statistics into restricted $V$-statistics and leveraging multiplicative-decomposable kernel structures, the authors connect the computation of $U$-statistics to Einsum operations and graph-theoretic quantities such as treewidth. The paper also develops an accompanying software package (\texttt{u-stats}) and demonstrates substantial computational gains in several examples, including higher-order influence functions, motif counting, and distance covariance measures.}
+
+\emph{The topic is of interest and relevant, especially given the increasing appearance of higher-order $U$-statistics in modern statistics and machine learning. The paper is generally well written and contains several interesting ideas. However, some concerns require clarification. Please see my detailed comments below.}
+
+\begin{todo}
+    Thank the referee and summarise our responses to the three points below.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\begin{enumerate}
+
+\item The computational gains rely heavily on the kernel admitting a useful multiplicative-decomposable (MD) structure, together with the feasibility of tensorization. For more general kernels without such structure, the proposed method may not provide meaningful improvements over brute-force computation. I would recommend clarifying more explicitly the class of $U$-statistics for which the framework is practically effective, and avoiding phrases such as ``general higher-order $U$-statistics'' without qualification.
+\begin{todo}
+    Motif counting is an example where the method does not beat brute force even though the kernel has an MD structure. We can show that an $m$-th order $U$-statistic whose decomposition graph is the complete graph is exactly the case in which the maximum treewidth of its quotient graph equals $m-1$; hence whether a complexity gain is possible reduces to checking whether the decomposition graph is complete, which is easy to verify.
+
+    Even in this case (MD structure with $K > 1$ but a complete decomposition graph) our framework remains useful: after the sparsification trick only a single term survives, so the target quantity is computed by one \Einsum{} operation --- and \Einsum{} is a mature, highly optimised primitive that still improves on a naive brute-force implementation.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\item The paper mainly emphasizes time complexity, but the space complexity appears to be a potentially serious bottleneck. The tensorization step may require storing high-order tensors whose size grows rapidly with the sample size and decomposition structure. This issue is only briefly mentioned in the concluding remarks, but in practice it strongly affects scalability. I would recommend providing a more explicit discussion of memory complexity, possibly together with empirical memory usage in the numerical experiments.
+\begin{todo}
+    Add a discussion of memory (space) complexity: state it in the main complexity theorem, add a remark right after the tensorization step, and give an appendix bound on the size of the largest intermediate tensor formed during the \Einsum{} contraction.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\item In the motif counting example, the proposed method performs particularly well for dense graphs, while specialized enumeration-based algorithms appear substantially faster in sparse regimes. I think the paper would benefit from a more detailed discussion of this point.
+\begin{todo}
+    Add a remark in the motif-counting section: because the relevant decomposition graph is already complete, our method's cost depends essentially only on $n$ and is largely independent of the edge density $p$, whereas enumeration-based methods (\igraph{}, \peregrine{}, \cugraph{}) exploit sparsity and are therefore faster in the sparse regime.
+\end{todo}
+\begin{reply}      \end{reply}
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography.  The replies cite work with \citet{...}/\citep{...}, so BibTeX
+% must run (Overleaf does this automatically on a full recompile).  Master.bib
+% lives in the project root, which is Overleaf's working directory at compile
+% time.  If a reply stops citing anything, comment these two lines back out.
+\bibliographystyle{plainnat}
+\bibliography{Master}
+
+\end{document}

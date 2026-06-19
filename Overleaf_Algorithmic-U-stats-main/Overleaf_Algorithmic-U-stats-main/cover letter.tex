@@ -1,0 +1,140 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Long Lined Cover Letter
+% LaTeX Template
+% Version 2.0 (September 17, 2021)
+%
+% This template originates from:
+% https://www.LaTeXTemplates.com
+%
+% Authors: Fanchao Chen
+% (chenfc@fudan.edu.cn)
+%
+% License:
+% CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[11pt]{article}
+
+\usepackage{charter} % Use the Charter font
+\usepackage{hyperref}
+
+\usepackage[
+	a4paper, % Paper size
+	top=1in, % Top margin
+	bottom=1in, % Bottom margin
+	left=1in, % Left margin
+	right=1in, % Right margin
+	%showframe % Uncomment to show frames around the margins for debugging purposes
+]{geometry}
+
+\setlength{\parindent}{0pt} % Paragraph indentation
+\setlength{\parskip}{1em} % Vertical space between paragraphs
+
+\usepackage{graphicx} % Required for including images
+
+% \usepackage{fancyhdr} % Required for customizing headers and footers
+\iffalse
+\fancypagestyle{firstpage}{%
+	\fancyhf{} % Clear default headers/footers
+	\renewcommand{\headrulewidth}{0pt} % No header rule
+	\renewcommand{\footrulewidth}{1pt} % Footer rule thickness
+}
+
+\fancypagestyle{subsequentpages}{%
+	\fancyhf{} % Clear default headers/footers
+	\renewcommand{\headrulewidth}{1pt} % Header rule thickness
+	\renewcommand{\footrulewidth}{1pt} % Footer rule thickness
+}
+
+\AtBeginDocument{\thispagestyle{firstpage}} % Use the first page headers/footers style on the first page
+\pagestyle{subsequentpages} % Use the subsequent pages headers/footers style on subsequent pages
+
+\fi
+%----------------------------------------------------------------------------------------
+\usepackage{natbib}
+\bibliographystyle{unsrt}
+
+\newcommand{\libref}[2]{\href{#2}{\texttt{#1}}}
+\def\package{\libref{u-stats}{https://github.com/zrq1706/U-Statistics-python}}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	FIRST PAGE HEADER
+%----------------------------------------------------------------------------------------
+
+%\includegraphics[width=0.4\textwidth]{fudan.png} % Logo
+
+\vspace{-1em} % Pull the rule closer to the logo
+
+% \rule{\linewidth}{1pt} % Horizontal rule
+
+\bigskip\bigskip % Vertical whitespace
+
+%----------------------------------------------------------------------------------------
+%	YOUR NAME AND CONTACT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\iffalse
+\hfill \begin{tabular}{l @{}}
+	\today \bigskip\\ % Date
+	Lin Liu \\
+	Institute of Natural Sciences \\ % Address
+	Shanghai Jiao Tong University, Shanghai China \\
+	Email: \href{linliu@sjtu.edu.cn}{linliu@sjtu.edu.cn}
+\end{tabular}
+\fi
+
+\bigskip % Vertical whitespace
+
+%----------------------------------------------------------------------------------------
+%	ADDRESSEE AND GREETING
+%----------------------------------------------------------------------------------------
+
+
+
+\bigskip % Vertical whitespace
+
+Dear Prof. Ajay Jasra, 
+
+\bigskip % Vertical whitespace
+
+%----------------------------------------------------------------------------------------
+%	LETTER CONTENT
+%----------------------------------------------------------------------------------------
+
+%People who may be relevant reviewers for this paper are listed below: \vspace{-10pt}
+%\begin{itemize}
+%{\setlength{\parskip}{0em}
+ %   \item Edward Kennedy, Carnegie Mellon University, edward@stat.cmu.edu
+  %  \item Stijn Vansteelandt, Ghent University, Stijn.Vansteelandt@UGent.be
+ %   \item Oliver Dukes, Ghent University, Oliver.Dukes@UGent.be
+%}
+%\end{itemize}\vspace{-5pt}
+
+We are writing to submit our manuscript entitled ``On computing and the complexity of computing higher-order $U$-statistics, exactly'' to \textbf{Statistics and Computing}.
+
+Applications of $U$-statistics are abundant in statistics, machine learning, and data science. To name a few: higher-order influence functions (HOIF), a generalization of classical first-order influence functions in semiparametric statistics, are higher-order $U$-statistics \cite{robins2017minimax}; motif counts, a class of important quantities frequently encountered in network sciences and bioinformatics, are also higher-order $U$-statistics \cite{chatterjee2024higher}; the distance covariance measure, a classical measure of independence, can be written as a fourth-order $U$-statistic \citep{shao2025u}. However, it is well-known that these objects are notoriously difficult to compute, creating a quandary for methods based on $U$-statistics to be adopted by practitioners. For instance, both a recent important review \cite{cinelli2025challenges} and a recent textbook on causal inference \cite{wager2024causal} point out the computational difficulty of implementing HOIF estimators creates the barrier between this theoretically appealing framework and everyday statistical practice.
+
+To resolve the computation bottleneck, there is a long history in statistics in which (randomized) incomplete $U$-statistics are instead considered to sacrifice statistical efficiency for computational efficiency. In this paper, we try to flip the script by taking a different route and developing a general-purpose algorithm to efficiently compute higher-order $U$-statistics \emph{exactly}. Our algorithm first turns the given $U$-statistic into a linear combination of $V$-statistics, which are amenable to be computed by Einstein summation in tensor format. In particular, we discover that when the $U$-statistic kernel satisfies a certain \emph{decomposability} structure, our algorithm can drastically speed up the computation, thanks to the Einstein summation formulation. We also characterize the time complexity of computing $U$-statistics by using concepts from combinatorics and graph theory, and our complexity analysis streamlines and simplifies the existing analysis in the statistics literature, e.g. Section~2.3 in \cite{he2021asymptotically}.
+
+We wrap our algorithm into an open-source software package \underline{\package{}} (with both python and R interfaces) and demonstrates \textbf{a significant speedup} of our package compared to popular benchmarks via examples mainly drawn from \textbf{semi-/non-parametric causal inference} and \textbf{networks}; see Section~4 of our paper for more details. We envision that our package can alleviate the computational and coding burdens of practitioners and make the application of $U$-statistics in practice a more pleasant experience. 
+
+As our paper makes progress in a common computational problem in statistics, we hope that you find our paper a good fit to the journal \textbf{Statistics and Computing}. We look forward to hearing from you. Please feel free to contact us were further clarification needed.
+
+\bigskip % Vertical whitespace
+
+Sincerely yours,
+
+Lin Liu (\href{linliu@sjtu.edu.cn}{linliu@sjtu.edu.cn}) on behalf of Xingyu Chen and Ruiqi Zhang \newline
+Shanghai Jiao Tong University
+
+\bibliography{Master.bib}
+
+
+\end{document}

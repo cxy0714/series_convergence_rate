@@ -1,0 +1,267 @@
+\documentclass[12pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Self-contained preamble for the response letter.
+% NOTE: This file is meant to be compiled with the working directory at the
+% PROJECT ROOT (this is what Overleaf does), so that Master.bib is found and the
+% cross-references to the manuscript resolve.  See \externaldocument below.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{setspace}
+\oddsidemargin = 0pt
+\textwidth = 470pt
+\textheight = 630pt
+\topmargin = -10pt
+\headheight = -10pt
+\renewcommand{\baselinestretch}{1.5}
+\onehalfspacing
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage[mathcal]{euscript}   % match the manuscript's \mathcal font
+\usepackage{enumitem}
+\usepackage{makecell}
+
+\usepackage{xcolor}
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
+\definecolor{chicago-maroon}{RGB}{128,0,0}
+
+\usepackage[round]{natbib}       % for \citep / \citet in the replies
+
+\usepackage[bookmarks, colorlinks=true, plainpages=false,
+            citecolor=darkblue, linkcolor=teal, anchorcolor=red,
+            urlcolor=chicago-maroon]{hyperref}
+
+% Cross-reference labels in the revised manuscript so that the replies can write
+% e.g. ``see Remark~\ref{rem:...}''.  Compile ustats_revision.tex at least once so
+% that its .aux file exists; otherwise such references will simply show ``??''.
+% The path is relative to the project root (Overleaf's compilation directory).
+\usepackage{xr-hyper}
+\externaldocument{ustats_revision}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Response-letter helpers
+\newcommand{\Res}[1]{{\color{darkblue}{#1}}}   % our response text (optional)
+\newcommand{\Rev}[1]{{\color{red}{#1}}}        % text added/changed in the manuscript
+% Each reply is typeset entirely in blue.  Type the reply text between
+% \begin{reply} and \end{reply}; the colour resets automatically afterwards
+% so that the (black) referee comments are unaffected.
+\newenvironment{reply}{\par\smallskip\noindent\color{blue}Reply:\ \ignorespaces}{\par}
+
+% A few convenience macros mirroring the manuscript (add more from
+% ustats_revision.tex as needed when writing the replies).
+\newcommand{\Einsum}{\textsc{Einsum}}
+\newcommand{\treewidth}{\mathsf{tw}}
+\newcommand{\graphform}[1]{G_{#1}}
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\less}{O}          % big-O, as in the manuscript
+\newcommand{\greater}{\Omega}
+\newcommand{\appequal}{\Theta}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\calN}{\mathcal{N}}
+\newcommand{\calP}{\mathcal{P}}
+\newcommand{\calQ}{\mathcal{Q}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calT}{\mathcal{T}}
+\newcommand{\calU}{\mathcal{U}}
+\newcommand{\calV}{\mathcal{V}}
+\newcommand{\calX}{\mathcal{X}}
+\newcommand{\calZ}{\mathcal{Z}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\title{Responses to Referees' Reports}
+\date{}
+\author{}
+\maketitle
+
+\vspace{-4em}
+
+% =========================================================================
+% NOTE TO AUTHORS (delete before submission): the blue ``Reply'' texts below
+% are DRAFTS for your review.  Replies that promise manuscript changes (new
+% examples, added discussions, memory experiments, qualified wording, etc.)
+% still require the corresponding edits to be made in ustats_revision.tex.
+% References are given by the referees' own numbering (Definition 9,
+% Proposition 1, Observation 2, ...); switch to \ref{...} once you are happy
+% with the numbering in the revised manuscript.
+% =========================================================================
+
+\textbf{On the revision of ``On computing and the complexity of
+computing higher-order $U$-statistics, exactly'' submitted to \emph{Statistics and Computing}}. \\
+
+Dear Prof. Ajay Jasra, \\
+
+We are grateful to you for providing us with the opportunity to revise and resubmit our manuscript. We also sincerely thank the two anonymous referees for their constructive comments and feedback. In this revision, we have made the following changes:
+\begin{enumerate}
+\item Added worked, intuitive examples immediately after several of the more abstract definitions (the \Einsum{} notation/operation, treewidth, and the partition/V-set construction underlying the $U$-to-$V$ decomposition), so that the exposition is more accessible to statisticians who may be unfamiliar with the \Einsum{} operator or tensor-based algorithms.
+\item Clarified the precise class of $U$-statistics for which our framework yields genuine computational gains---namely, kernels admitting a non-trivial multiplicative-decomposable (MD) structure whose decomposition (and quotient) graphs have small treewidth---and qualified unqualified uses of the phrase ``general higher-order $U$-statistics''.
+\item Added an explicit discussion of space/memory complexity and reported empirical peak-memory usage alongside runtime in the numerical experiments.
+\item Clarified the novelty of our contributions relative to the existing \Einsum{}/tensor-network and algorithmic-complexity literature, and the distinction between our acceleration and dynamic-programming--based approaches.
+\item Expanded the discussions of how the treewidth and the quantities $M$, $N_l$, and $M(m)$ are computed in concrete examples, and of the dense-versus-sparse regimes in motif counting.
+\item Fixed typographical issues and clarified notation throughout.
+\end{enumerate}
+All major changes are highlighted in {\color{red}red} in the revised manuscript for ease of reference. We have addressed all the comments raised by the two referees, with our point-by-point responses detailed below. We hope that our manuscript is now in a form suitable for publication in \emph{Statistics and Computing}.
+
+\ref{def:treewidth_elimination}
+\ref{lem:decomp_u_to_v}
+\newpage
+
+\section*{Response to Referee 1}
+
+\subsection*{Summary and overall assessment}
+
+\emph{This paper proposes efficient and exact methods for computing $V$-statistics and $U$-statistics using Einstein summation. It also provides a theoretical characterization of the time complexity under idealized assumptions, together with several examples illustrating applications of the proposed approach.}
+
+\emph{Overall, I find the topic relevant and potentially useful, especially given the growing use of $U$-statistics in modern statistical applications. However, my impression is that the paper currently reads primarily as an application and review of existing Einsum-based operations and time-complexity analyses in the context of computing statistical quantities. To broaden the paper's practical impact, I encourage the authors to clarify the computational details and provide more intuitive examples for the abstract concepts introduced throughout the paper. Doing so would make the general procedure more accessible and would likely encourage broader use beyond the specific examples discussed.}
+
+\emph{In particular, several concepts are currently presented in a rather abstract way without sufficiently concrete examples immediately following the definitions. I believe that making the exposition easier to follow would substantially increase the paper's impact.}
+
+\emph{Regarding the characterization of optimal time complexity, it would be helpful to clarify what new techniques, conclusions, or insights the paper contributes relative to the existing literature on Einsum operations and algorithmic time complexity. My current impression, based on the main text, is that many of the general concepts are already well established in the literature on algorithmic complexity, whereas the specific statistical examples may not have been explicitly discussed before. If the paper contains additional new insights, I encourage the authors to highlight them more clearly.}
+
+\emph{In summary, I think this paper would be most useful if it were written for statisticians who work with $U$-statistics but may not have prior background in the Einsum operator or tensor-based algorithms. A more straightforward and accessible explanation of the efficient computation strategy would make the paper more useful and impactful than a primarily theoretical discussion of optimal time complexity, especially when it is unclear how that optimal complexity is achieved in practice. My specific comments are detailed below.}
+
+\begin{reply}
+We thank the referee for the encouraging assessment and for the constructive suggestion to make the paper more accessible and to better articulate its novelty. We have taken both points seriously in the revision. First, to improve accessibility, we have added concrete, worked examples immediately following the more abstract definitions (please see our replies to Comments~2, 3, 5, 6 and~7 for specifics), so that a reader who is unfamiliar with the \Einsum{} operator or tensor-based algorithms can follow the construction step by step. Second, to clarify our contributions relative to the existing literature, we emphasize that the \Einsum{}/tensor-network literature addresses tensor contraction, which in our language corresponds to computing a (single) \emph{$V$-statistic}; the genuinely new ingredients of our paper are precisely those needed to handle \emph{$U$-statistics} and to make the procedure usable by statisticians: (i) the exact decomposition of a general higher-order $U$-statistic into a signed combination of restricted $V$-statistics via M\"obius inversion (Lemma~1); (ii) the sparsification trick (Section~3.3, Lemma~2), which removes the vast majority of the (super-exponentially many) decomposition terms; (iii) an ``optimistic'' complexity characterization of computing general $U$-statistics through the treewidth of the associated (quotient) decomposition graphs, together with explicit treewidth-versus-edge-count bounds that make this characterization usable in concrete examples; and (iv) the open-source package \texttt{u-stats} (in both Python and R). We have revised the Introduction and the ``Main contributions'' paragraph to state these points more prominently, and we have reframed the exposition with the statistician reader in mind.
+\end{reply}
+
+\subsection*{Major comments}
+
+\begin{enumerate}
+
+\item In Section 3.2, the discussion of computational cost appears to focus mainly on Algorithm 2, namely the Einsum operation, while the cost of Algorithm 1 seems to be largely omitted. Moreover, on Page 6, Definition 3 states that ``there is no time complexity to access an entry in $T$, i.e., to evaluate $T$ on $\alpha$.'' Is this intended as a theoretical assumption, or is it meant to hold in practice? It would be helpful to explain why the complexity of querying entries of large tensors can be ignored.
+
+\begin{reply}
+We thank the referee for raising both points. (i) Regarding Algorithm~1 (tensorization): we have added an explicit statement of its cost. Tensorizing a kernel with MD structure $\calH\times\calA$ evaluates each component $h_k$ on all $|A_k|$-tuples, costing $\less\!\big(\sum_{k=1}^{K} c_k\, n^{|A_k|}\big)$, where $c_k$ is the cost of one evaluation of $h_k$; when each $c_k=\less(1)$ this is $\less(K\, n^{m_{\max}})$ with $m_{\max}=\max_k|A_k|$. We deliberately separate this preprocessing cost from the analysis of the \Einsum{} step because (a) it is problem-specific (it depends on the cost of evaluating the kernel components, which is outside our control), and (b) the \Einsum{} step is where the treewidth-based speedup---and the main novelty---resides; it typically dominates, or is of the same order as, tensorization. We now state this explicitly at the start of Section~3.2 and in the assumptions of the complexity results. (ii) Regarding Definition~3: this is a modeling assumption, not a claim about hardware. We adopt the standard unit-cost (word-)RAM model used throughout algorithmic complexity and the tensor-computation literature, in which retrieving a stored array/tensor entry by its index is a constant-time random-access operation; this lets us count arithmetic operations (FLOPs) as the unit of cost. We have revised Definition~3 to say so, and we now explicitly acknowledge that memory access (and storage) can be a practical bottleneck for very large tensors---see our reply to Referee~2's Comment~2 on space complexity.
+\end{reply}
+
+\item On Page 7, Definitions 4--5 introduce the general Einsum notation and operation using an input tuple list $\mathcal{A}$ and an output tuple $B$. However, the role of the output tuple $B$ is not immediately clear. In the main examples, it appears that only the case $B = \emptyset$ is used.
+\begin{enumerate}
+\item I noticed that additional examples with $B \neq \emptyset$ are provided in Appendix A. It would be helpful to explicitly mention in the main text that Example 1 illustrates the case $B = \emptyset$, while additional examples with $B \neq \emptyset$ are given in Appendix A. At present, the main text does not clearly highlight the new information provided in the appendix.
+
+\begin{reply}
+We agree and have clarified the role of $B$. The output tuple $B$ specifies the \emph{free} (uncontracted) indices that are retained in the output tensor; every index not listed in $B$ is summed over. Hence $|B|$ is the order of the output: when $B=\emptyset$ the output is a scalar, which is exactly the case relevant to computing a single ($\mathbb{R}$-valued) $U$/$V$-statistic, whereas $B\neq\emptyset$ produces a tensor-valued output and is what makes the \Einsum{} operation general enough to also express, e.g., matrix multiplication or partial traces. We include the general $B$ because it is needed to describe intermediate steps of a contraction and to connect with standard \Einsum{} implementations. As suggested, we have added a sentence right after Definition~5/Example~1 stating explicitly that the running example (Example~1) is the case $B=\emptyset$, and that Appendix~A gives two further examples with $B\neq\emptyset$ (matrix multiplication, with $B=(1,3)$, and a higher-order partial trace, with $B=(1,5,6)$).
+\end{reply}
+
+\item In Appendix A, the labels ``Example 2'' and ``Example 3'' conflict with examples in the main text. These could be renamed as Examples A.2 and A.3, or Examples S.2 and S.3, to avoid confusion.
+
+\begin{reply}
+Thank you for catching this. We have relabeled the appendix examples so that they no longer collide with the main-text numbering: the two examples in Appendix~A are now labeled Example~A.1 and Example~A.2 (and, more generally, all appendix examples, tables, and figures now carry an appendix prefix). Concretely, this is achieved by resetting/redefining the relevant counters at \verb|\appendix| so that examples are numbered as A.1, A.2, etc.
+\end{reply}
+
+\end{enumerate}
+
+\item On Page 14, Proposition 1 characterizes the time complexity in terms of $\mathsf{tw}(G_{\mathcal{A}})$. However, it is still unclear to me what $\mathsf{tw}(G_{\mathcal{A}})$ would be in simple examples. I suggest adding simple examples to illustrate this quantity and explain how it is computed from the definitions.
+
+\begin{reply}
+This is a helpful suggestion. We have added a short paragraph immediately after Proposition~1 that computes $\mathsf{tw}(G_{\calA})$ for the small decomposition graphs already displayed in Figure~3 (the figure of example decomposition graphs), explaining the vertex-elimination definition along the way: (a) for the running example $\calA=((1,2),(2,3),(3,4))$, $G_{\calA}$ is a path (chain) on four vertices; eliminating vertices from one end never creates new edges, so the largest degree-at-elimination is~$1$ and $\mathsf{tw}(G_{\calA})=1$, giving complexity $\less(n^{2})$; (b) for the triangle motif $\calA=((1,2),(2,3),(3,1))$, $G_{\calA}=K_3$ and $\mathsf{tw}=2$; (c) for the $4$-clique motif $\calA=((1,2),(1,3),(1,4),(2,3),(2,4),(3,4))$, $G_{\calA}=K_4$ and $\mathsf{tw}=3$ (in general $\mathsf{tw}(K_r)=r-1$). We walk through the elimination ordering in case~(a) explicitly so the reader sees how the value is obtained from Definition~8 (treewidth).
+\end{reply}
+
+\item On Page 14, Remark 3 discusses the difficulty of finding an ordering corresponding to the treewidth in practice. After reading this remark, it is unclear what ``real'' time complexity one should expect in practice, as opposed to the optimal theoretical complexity. It would be useful to clarify how well existing packages approximate the optimal ordering and how much inefficiency might arise in practice.
+
+The paper mentions two strategies, greedy search and exhaustive search. Which of these is preferable in terms of approximating the optimal ordering? Some guidance on their relative advantages and limitations would be helpful.
+
+Remark 3 also mentions that Zhang et al. (2025) used dynamic programming. How does the implementation in the present paper differ from that of Zhang et al. (2025) in order to accelerate the computation? Is dynamic programming avoided, or is the computational gain primarily due to sparsification in Section 3.3? This distinction is currently unclear.
+
+\begin{reply}
+We have expanded Remark~3 to address all three questions. (a) \emph{Real vs.\ optimal complexity.} The treewidth-optimal ordering is NP-hard to find, so in practice we delegate ordering selection to the mature library \texttt{opt\_einsum}; the realized cost is that of the ordering it returns. Crucially, this ordering depends only on the kernel's MD structure (the decomposition signature $\calA$), not on the data or on $n$. Therefore, for any kernel that one expects to reuse, the optimal ordering can be found \emph{once}---if necessary by exhaustive search, performed offline without touching the data---and cached, after which the realized complexity coincides with the optimistic estimate. We now make this point explicitly and note that, for the moderate-order kernels in our examples, the gap is small. (b) \emph{Greedy vs.\ exhaustive.} \texttt{opt\_einsum} offers both: the greedy heuristic is fast and scales to large problems but may return a sub-optimal ordering, whereas the exhaustive (dynamic-programming) search returns the optimal ordering but its cost grows quickly with the number of components/indices. Our practical recommendation, now stated in Remark~3, is to use exhaustive/DP search once per kernel structure and reuse the result, and to fall back on the greedy strategy only for very large or one-off problems. (c) \emph{Relation to Zhang et al.\ (2025).} The two uses of dynamic programming are different. Zhang et al.\ (2025) apply DP to evaluate an \emph{incomplete} $U$-statistic with one specific kernel structure, i.e.\ DP is the evaluation engine tailored to that structure. In our framework, DP appears only as one optional \emph{ordering-search} heuristic inside the single \Einsum{} step; our acceleration does not rely on it. Our gains come instead from (i) decomposing a general $U$-statistic into restricted $V$-statistics (Lemma~1), (ii) computing each $V$-statistic exactly by one \Einsum{} whose cost is governed by the treewidth, and (iii) the sparsification trick of Section~3.3, which eliminates the great majority of decomposition terms. We have rewritten the relevant part of Remark~3 to draw this distinction clearly.
+\end{reply}
+
+\item On Page 15, Definition 11 introduces a partition $\pi$. What exactly does the partition $\pi$ do, and what does $Q \in \pi$ mean in this context? It would be helpful to include simple examples illustrating these definitions.
+
+Similarly, on Page 16, the paper states that ``$\mathcal{A}_\pi$ simply identifies all the indices that happen to belong to the same subset of the partition $\pi$. The procedure is presented in Algorithm 3.'' The general description is difficult to interpret without a concrete example. I suggest adding a small example that walks through the construction step by step.
+
+On Pages 17--18, Remark 4 is also difficult to follow. In particular, it is unclear how to interpret equation (4) and how the stated conclusion follows. Additional explanation or examples would make this part much clearer.
+
+\begin{reply}
+We thank the referee and have added concrete illustrations for all three items. (a) \emph{The partition $\pi$ and $Q\in\pi$.} A partition $\pi$ of $[m]$ is a collection of disjoint, non-empty blocks whose union is $[m]$, and $Q\in\pi$ denotes one such block. Its role is to record which arguments of the kernel are forced to share the same index: in the corresponding V-set, all indices lying in the same block $Q$ are set equal, so summing over the V-set yields a (lower-order) restricted $V$-statistic. This is what allows a $U$-statistic---a sum over \emph{distinct} indices---to be written as a signed combination of restricted $V$-statistics (Lemma~1). We now give a small example for $m=4$: for $\pi=\{\{1,3\},\{2\},\{4\}\}$ the blocks are $Q_1=\{1,3\}$, $Q_2=\{2\}$, $Q_3=\{4\}$, and the V-set forces $s_1=s_3$. (b) \emph{Construction of $\calA_\pi$.} We have added a step-by-step walkthrough of Algorithm~3 on the running example $\calA=((1,2),(2,3),(3,4))$ with the same $\pi=\{\{1,3\},\{2\},\{4\}\}$: relabeling each index by its block (here $1,3\mapsto$ one label, $2$ and $4$ to their own labels) turns $\calA$ into $\calA_\pi=((1,2),(2,1),(1,3))$, and we show how this $\calA_\pi$ corresponds to the quotient graph $G_{\calA}/\pi$. (c) \emph{Remark 4 and equation (4).} Equation~(4) defines the set $\Pi_m^{\calA}$ of partitions that \emph{survive} sparsification---those in which no block contains two or more indices that co-occur in any single component $A\in\calA$. The conclusion that only these terms remain follows from Lemma~2: if a block identifies two indices that appear together in some $A_k$, the corresponding restricted $V$-statistic vanishes on the sparsified tensors $\widetilde{\calT}$ (because a $U$-statistic sums only over distinct indices), so that term can be skipped. We have expanded Remark~4 accordingly and placed the worked $4$th-order example (in which $15$ non-redundant terms reduce to $5$) right after it.
+\end{reply}
+
+\item On Page 19, Remark 5 states that ``$N_l$ and $M$ can in principle be computed for concrete examples.'' It would be useful to explain how this computation is performed in practice, perhaps through a simple example or a brief algorithmic description.
+
+\begin{reply}
+We have expanded Remark~5 with an explicit recipe and a worked example. Recall that $M=\max\{\mathsf{tw}(G_{\calA}/\pi):\pi\in\Pi_m^{\calA}\}$ and $N_l=|\{\pi\in\Pi_m^{\calA}:\mathsf{tw}(G_{\calA}/\pi)=l\}|$. In practice: (i) $M$ can be bounded using our treewidth-versus-edge-count result (Observation~3 / Appendix~F): since every quotient graph $G_{\calA}/\pi$ has at most $|E(G_{\calA})|$ edges, $M\le \mathrm{t}(|E(G_{\calA})|)$, and the exact value of $M$ is then pinned down by exhibiting an extremal partition; we carry this out for the HOIF example in Observation~2 (Appendix~G), where $M(m)$ is computed for all $m=2,\dots,12$. (ii) $N_l$ is currently obtained by enumerating $\Pi_m^{\calA}$ (after sparsification) and computing the treewidth of each quotient graph; we are not aware of a closed-form count, and a convenient loose upper bound is the total number of surviving $V$-statistics (reported in the sparsification column of Table~6 in Appendix~G). We have added this description, together with a pointer to the HOIF computation as a concrete illustration.
+\end{reply}
+
+\item On Page 21, the last two lines state: ``Then obviously $h^{(m)}_j$ allows for an MD structure, by letting $f_l(X_1, X_2) := A_1\phi(Z_1)^{\top} A_2\phi(Z_2)$ for $l < j$ and $f_j(X_1, X_2) := A_1\phi(Z_1)^{\top} \phi(Z_2) Y_2$. The corresponding decomposition signature of $h^{(m)}_j$ is $((i, i+1))_{i=1}^{j-1}$.'' This explanation would be clearer if it were matched more explicitly to the notation introduced earlier. For example, what do $\mathcal{A} = \{A_1, \ldots, A_k\}$ and $h_k(\cdot)$ in Definition 9 correspond to in this example?
+
+On Page 22, the paper states that ``the computational complexity up to order $m = 12$ is analyzed in Observation 2 in Appendix G.'' Why is the analysis restricted to $m \leq 12$? What is the intuition behind the derivation of Observation 2? Is there an approximate upper bound, say $M(m)$, that could help readers understand how the problem complexity scales with $m$? Some intuitive explanation would be helpful.
+
+\begin{reply}
+(a) \emph{Matching to Definition~9.} We have rewritten this passage to make the correspondence explicit. For the kernel $h_j^{(m)}$, the MD structure of Definition~9 is $\calH\times\calA$ with $K=j-1$ components: the decomposition signature is $\calA=\calA_{\mathsf{HOIF},j}=(A_1,\dots,A_{j-1})$ with $A_i=(i,i+1)$, and the kernel components are $\calH=(h_1,\dots,h_{j-1})$ with $h_i\equiv f_i$, i.e.\ $h_i(X_i,X_{i+1})=A_i\phi(Z_i)^{\top}A_{i+1}\phi(Z_{i+1})$ for the ``interior'' factors and the boundary factor carrying $\phi(Z)Y$; here ``$A$'' inside $\phi$ is the (scalar) treatment, not to be confused with the index tuples $A_k$, and we have adjusted the notation/wording to avoid this clash. Thus $h_k(\cdot)$ of Definition~9 is exactly $f_k$, and the decomposition graph $G_{\calA_{\mathsf{HOIF},j}}$ is the chain on $j$ vertices with $e=j-1$ edges. (b) \emph{Why $m\le 12$, intuition, and $M(m)$.} The quantity $M(m)$ defined in Observation~2 \emph{is} the approximate upper bound the referee asks for: by Corollary~2 the cost scales as $\less(n^{M(m)+1})$, so $M(m)$ is precisely the exponent governing how the complexity grows with $m$. The intuition behind Observation~2 is a matching upper/lower bound argument: since each HOIF quotient graph has at most $m-1$ edges, $M(m)\le \mathrm{t}(m-1)$ via our treewidth-versus-edge-count bound, while explicit extremal partitions provide matching lower bounds (the two tables in Appendix~G). The analysis is presented up to $m=12$ for two reasons, which we now state: (i) our \emph{exact} treewidth-versus-edge-count values $\mathrm{t}(e)$ are currently established only for $e\le 15$ (Observation~3), and since the HOIF graph has $e=m-1$ edges this covers $m\le 16$; and (ii) the number of decomposition terms is the Bell number $\mathsf{B}_m$, which grows super-exponentially ($\mathsf{B}_{12}\approx 4.2\times 10^{6}$), so brute-force enumeration of the surviving partitions (needed for $N_l$) becomes impractical well beyond $m=12$. We have added this explanation right after the HOIF kernel and in Observation~2.
+\end{reply}
+
+\end{enumerate}
+
+\subsection*{Minor comments}
+
+\begin{enumerate}
+\setcounter{enumi}{7}
+
+\item On Page 8, Example 1 states: ``The last example that we consider \ldots'' What does ``last example'' refer to here? Is this a typo?
+
+\begin{reply}
+Yes, this was a typo. There is no ``last'' example intended here; the example in question is the \emph{running} example that is reused throughout Section~3. We have corrected the sentence to ``The running example that we consider in the main text \ldots'' (the correction is highlighted in red in the revised manuscript).
+\end{reply}
+
+\item On Page 10, Definition 9, how should one interpret the double superscript notation ``$\in [m]^{**}$''?
+
+\begin{reply}
+Recall from the Notation paragraph that, for a set $S$, $S^{*}\coloneqq\bigcup_{k\ge 1}S^{k}$ denotes the set of all (finite) tuples with entries in $S$. The double star is this construction applied twice: $[m]^{**}\coloneqq([m]^{*})^{*}$ is the set of all tuples whose entries are themselves tuples from $[m]^{*}$---that is, a ``tuple of index-tuples''. Writing $\calA=(A_1,\dots,A_K)\in[m]^{**}$ therefore just means that $\calA$ is a tuple whose $k$-th entry is an index-tuple $A_k\in[m]^{*}$. We have added this one-line clarification at Definition~9 (and recalled the meaning of $S^{*}$ in the Notation paragraph).
+\end{reply}
+
+\end{enumerate}
+
+\newpage
+
+
+\section*{Response to Referee 2}
+
+\subsection*{Summary and overall assessment}
+
+\emph{This paper studies the exact computation of higher-order $U$-statistics through a tensor-based framework. By decomposing $U$-statistics into restricted $V$-statistics and leveraging multiplicative-decomposable kernel structures, the authors connect the computation of $U$-statistics to Einsum operations and graph-theoretic quantities such as treewidth. The paper also develops an accompanying software package (\texttt{u-stats}) and demonstrates substantial computational gains in several examples, including higher-order influence functions, motif counting, and distance covariance measures.}
+
+\emph{The topic is of interest and relevant, especially given the increasing appearance of higher-order $U$-statistics in modern statistics and machine learning. The paper is generally well written and contains several interesting ideas. However, some concerns require clarification. Please see my detailed comments below.}
+
+\begin{reply}
+We thank the referee for the careful reading and the positive assessment, as well as for the three insightful points on the scope of the method, space complexity, and the sparse-graph regime. We address each of them in detail below; in short, we have (i) clarified the precise class of $U$-statistics for which our framework is effective, (ii) added a discussion of memory complexity together with empirical memory measurements, and (iii) expanded the discussion of the dense-versus-sparse trade-off in motif counting.
+\end{reply}
+
+\begin{enumerate}
+
+\item The computational gains rely heavily on the kernel admitting a useful multiplicative-decomposable (MD) structure, together with the feasibility of tensorization. For more general kernels without such structure, the proposed method may not provide meaningful improvements over brute-force computation. I would recommend clarifying more explicitly the class of $U$-statistics for which the framework is practically effective, and avoiding phrases such as ``general higher-order $U$-statistics'' without qualification.
+
+\begin{reply}
+We fully agree, and we have made the scope precise. The computational gain requires a \emph{non-trivial} MD structure (Definition~9, i.e.\ $K>1$) whose decomposition graph---and, for $U$-statistics, the associated quotient graphs---has small treewidth. We have added a remark making the two extremes explicit: when the kernel admits no exploitable structure (so that the decomposition signature is a single full tuple, and $G_{\calA}$ is a complete graph), the treewidth is $\approx m-1$ and our complexity estimate $\less(n^{\mathsf{tw}+1})$ degrades to the brute-force $\less(n^{m})$, i.e.\ no asymptotic gain; the substantial speedups occur precisely when the decomposition signature is ``sparse'' (e.g.\ the chain signatures of HOIFs, or the bounded-treewidth signatures of motifs and $\mathsf{dCov}^2$). Accordingly, we have gone through the manuscript and qualified phrases such as ``general higher-order $U$-statistics'': our \emph{algorithm} applies to general kernels, but the \emph{computational benefit} is realized specifically for kernels with a non-trivial, low-treewidth MD structure. We have also adjusted the abstract and Introduction to reflect this distinction.
+\end{reply}
+
+\item The paper mainly emphasizes time complexity, but the space complexity appears to be a potentially serious bottleneck. The tensorization step may require storing high-order tensors whose size grows rapidly with the sample size and decomposition structure. This issue is only briefly mentioned in the concluding remarks, but in practice it strongly affects scalability. I would recommend providing a more explicit discussion of memory complexity, possibly together with empirical memory usage in the numerical experiments.
+
+\begin{reply}
+We agree that space complexity deserves a fuller treatment and have added one. The memory footprint has two parts: storing the component tensors after tensorization, costing $\less\!\big(\sum_k n^{|A_k|}\big)$, and storing the intermediate tensors produced during the \Einsum{} contraction. For an ordering that realizes treewidth $w$, the largest intermediate tensor has $\less(n^{w+1})$ entries, so the peak memory scales as $\less(n^{w+1})$ for a $V$-statistic and $\less(n^{M+1})$ for a $U$-statistic---the same exponent that governs the time complexity. This is precisely the reason, noted in the Concluding Remarks, that very high-order tensors force $n$ to be moderate (e.g.\ HOIF order $\le 7$ at $n=10^4$). In the revision we (i) add this $\less(n^{w+1})$ memory analysis explicitly to Sections~3.2--3.3, and (ii) report empirical peak-memory usage alongside runtime in the numerical experiments (an added memory column in the HOIF and motif-counting tables). We have also strengthened the Concluding Remarks to highlight the time--space trade-off as a central direction for future work.
+\end{reply}
+
+\item In the motif counting example, the proposed method performs particularly well for dense graphs, while specialized enumeration-based algorithms appear substantially faster in sparse regimes. I think the paper would benefit from a more detailed discussion of this point.
+
+\begin{reply}
+We agree and have expanded Section~\ref{sec:example_motif} with an explicit discussion of the dense-versus-sparse trade-off. The contrast has a clean explanation: our method operates on the (dense) adjacency tensor, and its cost depends on $n$ and on the motif's treewidth but is essentially \emph{independent of the edge density} $p$---hence the nearly constant runtimes across $p$ in our tables. Enumeration-based methods (\texttt{igraph}, \texttt{Peregrine}, \texttt{cuGraph}), by contrast, exploit sparsity: their cost scales with the number of partial subgraph matches, which is small for sparse graphs but grows sharply (eventually exceeding time/memory limits) as the graph becomes dense. Consequently, enumeration is preferable in the sparse regime, whereas our \Einsum{}-based approach dominates in the dense regime---and additionally offers a single, motif-agnostic, GPU-friendly implementation rather than bespoke per-motif code. We now state this guidance explicitly and connect it to the regimes visible in Tables~3--4 and the GPU triangle-counting table.
+\end{reply}
+
+\end{enumerate}
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography.  UNCOMMENT the two lines below once your replies cite anything
+% with \citep{...}/\citet{...}.  (They are commented out for now so that the
+% letter compiles cleanly while there are no citations yet.)  Master.bib lives
+% in the project root, which is Overleaf's working directory at compile time.
+% \bibliographystyle{plainnat}
+% \bibliography{Master}
+
+\end{document}

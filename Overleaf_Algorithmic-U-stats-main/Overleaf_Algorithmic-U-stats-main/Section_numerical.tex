@@ -1,0 +1,130 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\input{preamble.tex}
+
+\usepackage[mathcal]{euscript}
+\usepackage{bbold}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{bibunits}
+
+\newcommand{\Lin}[1]{{\color{purple}{Lin: #1}}}
+\newcommand{\Zhang}[1]{{\color{blue}{Zhang: #1}}}
+\newcommand{\Chen}[1]{{\color{orange}{Chen: #1}}}
+
+\renewcommand{\todo}[2][]{%
+    \textcolor{red}{%
+        \textbf{ \#TODO%
+        \if\relax\detokenize{#1}\relax%
+        \else%
+            \ (#1)%
+        \fi%
+        : #2}%
+    }%
+}
+
+% user-defined macros
+% stats notations
+\newcommand{\uset}{\calU}
+\newcommand{\usetp}[2]{\uset(#1,#2)}
+\newcommand{\vset}{\calV}
+\newcommand{\vsetp}[2]{\vset(#1,#2)}
+
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\ustatp}[2]{\ustat(#1,#2)}
+\newcommand{\vstatp}[2]{\vstat(#1,#2)}
+
+% set notations
+\newcommand{\samplespace}{\bbX}
+\newcommand{\takesetp}[1]{\mathrm{set}[#1]}
+
+% combinatoric notations
+\newcommand{\perm}[1]{\mathrm{Perm}(#1)}
+\newcommand{\partition}{\mathrm{Partition}}
+\newcommand{\partitionp}[1]{\partition(#1)}
+\newcommand{\cover}{\mathcal{C}}
+% \newcommand{\alphabet}{\Gamma}
+% \newcommand{\letter}{\gamma}
+
+% tensor notations
+\newcommand{\ndim}{\mathrm{ndim}}
+\newcommand{\ndimp}[1]{\ndim(#1)}
+% \newcommand{\dim}{\mathrm{dim}}
+\newcommand{\dimp}[2]{\dim[#1](#2)}
+\newcommand{\indexset}{\mathrm{Indices}}
+\newcommand{\tensorcontraction}{\mathrm{contraction}}
+
+
+% Graph notations
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesg}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesg}[1]{E(#1)}
+\newcommand{\neighborsvg}[2]{N(#1,#2)}
+\newcommand{\graphcoverp}[1]{G_{#1}}
+\newcommand{\graphkernelp}[1]{G_{#1}}
+
+% Oh-notaions
+\newcommand{\greater}{\Omega}
+\newcommand{\less}{O}
+\newcommand{\muchgreater}{\omega}
+\newcommand{\muchless}{o}
+\newcommand{\appequal}{\Theta}
+
+% Spaces
+
+\newcommand{\mytensorspace}{\mathbb{T}}
+\newcommand{\mytensorspacep}[1]{\mathbb{T}_{#1}}
+\newcommand{\myindexspace}{\mathbb{I}}  
+\newcommand{\myindexspacep}[1]{\mathbb{I}_{#1}}
+\newcommand{\mygraphspace}{\mathbb{G}}
+\newcommand{\mygraphspacep}[1]{\mathbb{G}_{#1}}
+
+% operators
+\newcommand{\projectionindex}{\operatorname{P}}
+\newcommand{\projectionindexp}[1]{\operatorname{P}_{#1}}
+
+\newcommand{\indextograph}{\operatorname{C}}
+\newcommand{\indextographp}[1]{\operatorname{C}_{#1}}
+
+\newcommand{\sumonverindex}[2]{\operatorname{S}[#1](#2)}
+\newcommand{\eliminatevg}[2]{\operatorname{E}[#1](#2)}
+
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\mse{\mathsf{mse}}
+
+\def\package{}
+
+\begin{document}
+
+\allowdisplaybreaks
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/computation_time_heatmap.png}
+    \caption{\textbf{Computation Time for HOIF-mode Estimator:} The average computation time over 20 runs for the "HOIF"-mode estimator 
+$\bbU_{n,m} [ f_m ] \coloneqq \bbU_{n,m}\left[ A_1 X_1^{\top} \prod_{s=3}^{m-2}\left( A_s X_s X_{s+1}^{\top} A_{s+1} \right) A_2 X_2 \right]$, 
+evaluated under PyTorch (CPU backend). The computations were conducted on a machine equipped with an Intel Core i3-12100F CPU (4 cores, 8 threads).}
+    \label{fig:computer_specs}
+\end{figure}
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/computation_time_polynomial_fitting_n4000plus.png} 
+   \caption{
+    \textbf{Computation Time for HOIF-mode Estimator:} This graph shows the time-sample curves for the HOIF-mode estimator, $\bbU_{n,m} [ f_m ] \coloneqq \bbU_{n,m}\left[ A_1 X_1^{\top} \prod_{s=3}^{m-2}\left( A_s X_s X_{s+1}^{\top} A_{s+1} \right) A_2 X_2 \right]$, with orders $m=4, 5, 6, 7$. A third-order polynomial with all positive coefficients of $n$ is used to fit these curves, helping to estimate the number of terms for the maximum term $n^3$.
+}
+    \label{fig:example}
+\end{figure}
+
+
+
+% \begin{bibunit}
+% \putbib[\myreferences]
+% \end{bibunit}
+
+
+
+\end{document}

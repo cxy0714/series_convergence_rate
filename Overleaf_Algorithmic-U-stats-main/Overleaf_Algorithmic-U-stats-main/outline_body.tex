@@ -1,0 +1,146 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\input{preamble.tex}
+
+\usepackage[mathcal]{euscript}
+\usepackage{bbold}
+\usepackage{bibunits}
+
+\newcommand{\Lin}[1]{{\color{purple}{Lin: #1}}}
+\newcommand{\Zhang}[1]{{\color{blue}{Zhang: #1}}}
+\newcommand{\Chen}[1]{{\color{orange}{Chen: #1}}}
+
+\renewcommand{\todo}[2][]{%
+    \textcolor{red}{%
+        \textbf{ \#TODO%
+        \if\relax\detokenize{#1}\relax%
+        \else%
+            \ (#1)%
+        \fi%
+        : #2}%
+    }%
+}
+
+% user-defined macros
+% stats notations
+\newcommand{\pdfu}{\texorpdfstring{$U$}{U}}
+\newcommand{\pdfv}{\texorpdfstring{$V$}{V}}
+
+\newcommand{\uset}{\calU}
+\newcommand{\usetp}[2]{\uset(#1,#2)}
+\newcommand{\vset}{\calV}
+\newcommand{\vsetp}[2]{\vset(#1,#2)}
+
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\ustatp}[2]{\ustat(#1,#2)}
+\newcommand{\vstatp}[2]{\vstat(#1,#2)}
+
+% set notations
+\newcommand{\samplespace}{\bbX}
+\newcommand{\takesetp}[1]{\mathrm{set}[#1]}
+
+% combinatoric notations
+\newcommand{\perm}[1]{\mathrm{Perm}(#1)}
+\newcommand{\partition}{\mathrm{Partition}}
+\newcommand{\partitionp}[1]{\partition(#1)}
+\newcommand{\cover}{\mathcal{C}}
+% \newcommand{\alphabet}{\Gamma}
+% \newcommand{\letter}{\gamma}
+
+% tensor notations
+\newcommand{\ndim}{\mathrm{ndim}}
+\newcommand{\ndimp}[1]{\ndim(#1)}
+% \newcommand{\dim}{\mathrm{dim}}
+\newcommand{\dimp}[2]{\dim[#1](#2)}
+\newcommand{\indexset}{\mathrm{Indices}}
+\newcommand{\tensorcontraction}{\mathrm{contraction}}
+
+
+% Graph notations
+\newcommand{\eliminatevg}[2]{\operatorname{E}[#1](#2)}
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesg}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesg}[1]{E(#1)}
+\newcommand{\neighborsvg}[2]{N(#1,#2)}
+\newcommand{\graphcoverp}[1]{G_{#1}}
+\newcommand{\graphkernelp}[1]{G_{#1}}
+
+% Oh-notaions
+\newcommand{\greater}{\Omega}
+\newcommand{\less}{O}
+\newcommand{\muchgreater}{\omega}
+\newcommand{\muchless}{o}
+\newcommand{\appequal}{\Theta}
+
+
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\mse{\mathsf{mse}}
+
+\title{Outline of Body}
+\author{Zhang}
+
+\begin{document}
+\maketitle
+
+\section{Preliminaries}
+\subsection{\pdfu{}/\pdfv{} Statistics}
+\begin{enumerate}
+    \item U-set
+    \item V-set
+    \item U-statistics
+    \item V-statistics
+\end{enumerate}
+\subsection{Tensor Contraction}
+\begin{enumerate}
+    \item tensor expression
+    \item tensor contraction
+    \item tensor computation libraries
+    \item traditional path searching algorithm
+\end{enumerate}
+\subsection{Graphics}
+\begin{enumerate}
+    \item vertex elimination
+    \item treewidth
+\end{enumerate}
+
+\section{Tensorization Algorithm of \texorpdfstring{$U$}{U}/\texorpdfstring{$V$}{V} Statistics}
+\subsection{Multiplicative Decomposition of Kernel Function}
+\subsection{Tensorization of Kernel Function}
+\subsection{Decomposition of \pdfu{} Statistics to \pdfv{} Statistics}
+\subsection{Algorithms}
+\section{Index-wise Tensor Contraction}
+\subsection{Index-wise Contraction}
+\begin{enumerate}
+    \item operation of contracting one index and its complexity
+    \item contract index by index in a path
+    \item implementation and relationship to tensor-wise implementation
+\end{enumerate}
+
+\subsection{Characteristic Graph of Tensor Expression}
+\begin{enumerate}
+    \item definition
+    \item relationship of tensor operation and graph operation
+    \item computational complexity analysis
+     \begin{enumerate}[label=\alph*)]
+        \item treewidth bound 
+    \end{enumerate}
+    
+\end{enumerate}
+\subsection{Contraction Path Searching Algorithm}
+\begin{enumerate}
+    \item Greedy algorithm
+    \item exhaustive searching
+\end{enumerate}
+
+\section{Examples}
+\begin{enumerate}
+    \item sHOIF and MoM-chebysev
+\end{enumerate}
+
+\section{Numeric results}
+
+\section{Discussion}
+\end{document}

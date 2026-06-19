@@ -1,0 +1,966 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[margin=1in]{geometry}
+\input{preamble.tex}
+
+\usepackage[mathcal]{euscript}
+\usepackage{bbold}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{bibunits}
+
+\newcommand{\Lin}[1]{{\color{purple}{Lin: #1}}}
+\newcommand{\Zhang}[1]{{\color{blue}{Zhang: #1}}}
+\newcommand{\Chen}[1]{{\color{orange}{Chen: #1}}}
+
+\renewcommand{\todo}[2][]{%
+    \textcolor{red}{%
+        \textbf{ \#TODO%
+        \if\relax\detokenize{#1}\relax%
+        \else%
+            \ (#1)%
+        \fi%
+        : #2}%
+    }%
+}
+
+% user-defined macros
+\newcommand{\pdfu}{\texorpdfstring{$U$}{U}}
+\newcommand{\pdfv}{\texorpdfstring{$V$}{V}}
+% stats notations
+\newcommand{\uset}{\calU}
+\newcommand{\usetp}[2]{\uset(#1,#2)}
+\newcommand{\vset}{\calV}
+\newcommand{\vsetp}[2]{\vset(#1,#2)}
+
+\newcommand{\ustat}{\mathbb{U}}
+\newcommand{\vstat}{\mathbb{V}}
+\newcommand{\ustatp}[2]{\ustat(#1,#2)}
+\newcommand{\vstatp}[2]{\vstat(#1,#2)}
+
+% set notations
+\newcommand{\samplespace}{\bbX}
+\newcommand{\takesetp}[1]{\mathrm{set}[#1]}
+
+% combinatoric notations
+\newcommand{\perm}[1]{\mathrm{Perm}(#1)}
+\newcommand{\partition}{\mathrm{Partition}}
+\newcommand{\partitionp}[1]{\partition(#1)}
+\newcommand{\cover}{\mathcal{C}}
+% \newcommand{\alphabet}{\Gamma}
+% \newcommand{\letter}{\gamma}
+
+% partial order in partition
+\newcommand{\pleq}{\preceq}
+\newcommand{\pgeq}{\succeq}
+\newcommand{\pless}{\prec}
+\newcommand{\pgreater}{\succ}
+
+% tensor notations
+\newcommand{\ndim}{\mathrm{ndim}}
+\newcommand{\ndimp}[1]{\ndim(#1)}
+% \newcommand{\dim}{\mathrm{dim}}
+\newcommand{\dimp}[2]{\dim[#1](#2)}
+\newcommand{\indexset}{\mathrm{Indices}}
+\newcommand{\tensorcontraction}{\mathrm{contraction}}
+
+
+% Graph notations
+\newcommand{\vertices}[0]{V}
+\newcommand{\verticesg}[1]{V(#1)}
+\newcommand{\edges}[0]{E}
+\newcommand{\edgesg}[1]{E(#1)}
+\newcommand{\neighborsvg}[2]{N(#1,#2)}
+\newcommand{\graphcoverp}[1]{G_{#1}}
+\newcommand{\graphkernelp}[1]{G_{#1}}
+
+% Oh-notaions
+\newcommand{\greater}{\Omega}
+\newcommand{\less}{O}
+\newcommand{\muchgreater}{\omega}
+\newcommand{\muchless}{o}
+\newcommand{\appequal}{\Theta}
+
+% Spaces
+
+\newcommand{\mytensorspace}{\mathbb{T}}
+\newcommand{\mytensorspacep}[1]{\mathbb{T}_{#1}}
+\newcommand{\myindexspace}{\mathbb{I}}  
+\newcommand{\myindexspacep}[1]{\mathbb{I}_{#1}}
+\newcommand{\mygraphspace}{\mathbb{G}}
+\newcommand{\mygraphspacep}[1]{\mathbb{G}_{#1}}
+
+% operators
+\newcommand{\projectionindex}{\operatorname{P}}
+\newcommand{\projectionindexp}[1]{\operatorname{P}_{#1}}
+
+\newcommand{\indextograph}{\operatorname{C}}
+\newcommand{\indextographp}[1]{\operatorname{C}_{#1}}
+
+\newcommand{\sumonverindex}[2]{\operatorname{S}[#1](#2)}
+\newcommand{\eliminatevg}[2]{\operatorname{\phi}_{#1}(#2)}
+
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\mse{\mathsf{mse}}
+
+\def\package{\texttt{u-stats}}
+
+\begin{document}
+
+\allowdisplaybreaks
+
+\title{On computing and the complexity of computing a class of higher-order $U$/$V$-statistics, exactly}
+
+\author[1]{Xingyu Chen \thanks{E-mail: \texttt{chenxingyu0714@sjtu.edu.cn}}}
+\author[2]{Ruiqi Zhang \thanks{E-mail: \texttt{zrq1706@gmail.com} 
+X. Chen and R. Zhang are alphabetically ordered and contribute to the paper equally.}}
+
+\author[1, 3]{Lin Liu \thanks{E-mail: \texttt{linliu@sjtu.edu.cn}}}
+% \author[4]{Rajarshi Mukherjee \thanks{E-mail: \texttt{ram521@mail.harvard.edu}}}
+\affil[1]{School of Mathematical Sciences, CMA-Shanghai, Shanghai Jiao Tong University, China}
+\affil[2]{School of Mathematical Sciences, East China Normal University, China}
+\affil[3]{Institute of Natural Sciences, MOE-LSC, SJTU-Yale Joint Center for Biostatistics and Data Science, Shanghai Jiao Tong University, China}
+% \affil[4]{Department of Biostatistics, Harvard T. H. Chan School of Public Health, U.S.A.}
+    
+\date{\today}
+    
+\maketitle
+    
+\begin{abstract}
+Higher-order $U$/$V$-statistics (or equivalently homogeneous sums) appear frequently in statistics, probability, (theoretical) computer science, economics, statistical physics, and machine learning. It is folklore that these mathematical objects are time consuming to compute in practice. However, to our knowledge, a dedicated and systematic study of the computational complexity of $U$/$V$-statistics is lacking. In this note, we record a few results in that regard, which we believe are valuable to the statistical community and beyond. First, we derive an exact mapping from an $m$-th order $U$-statistic to a linear combination of $V$-statistics of orders no greater than $m$. In general, $V$-statistics are relatively easier to compute. Second, we study the connection between the time-complexity of computing a class of $m$-th order $V$-statistics to combinatorial graph theory, which is also closely related to tensor networks. Third, for $V$-statistics whose associated graphs have fewer than 15 edges (determined by the order $m$ and kernel structure), we characterize their near-exact time complexity and offer an easy-to-implement Python package called \package{}. We hope that this paper serves at least two purposes: 1. The theoretical results can draw attentions from researchers in graph theory, combinatorics, and theoretical computer science to further contribute to the algorithmic aspect of $U$/$V$-statistics; 2. The Python package \package{} (with GPU support) eases the burden on practitioners by enabling efficient implementation of $U$/$V$-statistics whose associated graphs have up to 6 edges, with computational and memory costs comparable to matrix multiplication.
+\end{abstract}
+\section{text style}
+
+\textrm{Roman Text} \\
+\textsf{Sans Serif Text} \\
+\texttt{Typewriter Text (tt)} \\
+\textsc{Small Caps (sc)} \\
+\textit{Italic Text} \\
+\textbf{Bold Text} \\
+{\slshape Slanted Text} \\
+{\upshape Upright Text} \\
+$\mathcal{ABC}$ (Calligraphic) \\
+$\mathbb{R}$ (Blackboard Bold)
+
+$\bigotimes$
+
+\section{Zhang's draft}
+
+
+\section{Tensorization Algorithm of \pdfu{}/\pdfv{}-statistics}\label{sec:v_alg}
+
+Since our algorithms is aim to use modern tensor computation libraries such as \numpy{} and \torch{} to perform computation of statistics, we start with tensorization of $V$-statistics.  
+
+\subsection{Tensorization}\label{sec:tensorization}
+
+Naively tensorizing a $V$-statistic without appropriate assumptions may lead to severe computational consequences, both in terms of spatial and temporal complexity, which will be explained at the end of this section. 
+
+At first, we introduce the assumption about kernel function we make to address this issue. 
+\begin{definition}[Multiplicative Decomposition of Function]\label{def:mul_decomp}
+    Let $\samplespace$ be a non-empty set, $m$ be a positive integer and $h$ be a function defined on $\samplespace^m$. Suppose that $\calA \coloneqq (A_k)_{k=1}^K \in [m]^{**}$ satisfies $\cup_{r=1}^R \takesetp{A_r} = [m]$ and $\calH \coloneqq (h_k)_{k=1}^K$ is a tuple of function where $h_k$ is a function defined on $\samplespace^{|A_k|}$. $(\calH, \calA)$ is called a multiplicative decomposition of function $h$, if $\forall \bm{x} \in \samplespace^m$, 
+    \begin{align*}
+        h(\bm{x}) = \prod_{k=1}^K h_k(\bm{x}[A_k]). 
+    \end{align*}
+    
+\end{definition}
+
+The multiplicative decomposition structure is not rare in statistics and other areas. There are many forms of $V$-statistics have such structure and some of them are shown in Section~\ref{sec:examples}. 
+
+
+\begin{algorithm}
+    \caption{Tensorization of Kernel Function}
+    \label{alg:tensorization}
+    \begin{algorithmic}[1]
+        \Require 
+            \Statex A kernel $h$ with decomposition factors $\calH \coloneqq (h_k: \bbX^{m_k} \to \reals)_{k=1}^K$
+            \Statex A sample list $\bm{X} = (X_1, \dots, X_n) \in \samplespace^n$ from a non-empty set $\samplespace$
+        \Ensure A tuple of tensors $\bm{\calH} \coloneqq (H_k: [n]^{m_k} \to \reals)_{k=1}^K$, where $H_k$ is the tensorized version of $h_k$
+
+        \Function{Tensorization}{$\calH, \bm{X}$}
+            \For{$k \in [K]$}  
+                \Comment{Iterate over each factor of kernel $h$}
+                \For{$\alpha \in [n]^{m_k}$}  
+                    \Comment{Iterate over all $m_k$-dimensional indices}
+                    \State $H_k(\alpha) \gets h_k(\bm{X}[\alpha])$  
+                    \Comment{Evaluate $h_k$ on the $\alpha$-slice of  $\bm{X}$}
+                \EndFor
+            \EndFor
+            \State \Return $\bm{\calH} \coloneqq (H_k)_{k=1}^K$  
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection{Algorithm of \pdfv{}-statistics}
+
+After introduce multiplicative decomposition of a function, we can tensorize $V$-statistics as follows: 
+
+Let $\vstat(h, \bm{X})$ be a $m$-th order $V$-statistic with kernel function $h$ and sample list $\bm{X}$ of length $n$. Suppose that function $h$ has multiplicative decomposition $(\calH \coloneqq (h_k)_{k=1}^K, \calA \coloneqq (A_k)_{k=1}^K)$. 
+
+We construct tensors $\bm{\calH} \coloneqq (H_k)_{k=1}^K$ as
+\begin{align}\label{eq:tesorizing}
+    H_k(\alpha_k) = h_k(\bm{X}[\alpha_k]), \quad \forall \alpha_k \in [n]^{|A_k|}. 
+\end{align}
+Then the V-statistic has a tensor form
+\begin{align*}
+    \vstat(h, \bm{X}) = \sum_{\alpha \in [n]^m} \prod_{k=1}^R H_r(\alpha[A_r]), 
+\end{align*}
+which is denoted by $\vstat(\bm{\calH}, \calA)$. 
+
+The above procedure is called tensorization of a $V$-statistic, and just involves factors of kernel function and the sample list, which is summarized in Algorithm~\ref{alg:tensorization}. 
+
+Then we introduce the relationship between $V$-statistics and tensor contraction. 
+
+For a tensorized $V$-statistics $\vstat(\bm{\calH}, \calA)$, where $\bm{\calH}, \calA$ is defined as the above~\eqref{eq:tesorizing}, by regarding $\calA$ as a tensor expression and applying it to tensors $\bm{\calH}$, following Definition~\ref{def:tensor_contraction}, we have
+\begin{align*}
+    \tensorcontraction(\bm{\calH}, \calA) = \sum_{\alpha \in [n]^m} \prod_{k=1}^K H_k(\alpha[A_k]), 
+\end{align*}
+which implies that
+\begin{align*}
+    \vstat(\bm{\calH}, \calA) = \tensorcontraction(\bm{\calH}, \calA). 
+\end{align*}
+This reveals that computing a $V$-statistic is the same as perform a tensor contraction and let us use modern and fast libraries to compute $V$-statistics. 
+
+We show the whole computation procedure of $V$-statistics in Algorithm~\ref{alg:v_stats}.
+
+\begin{algorithm}
+    \caption{Tensorization Algorithm of $V$-statistics}
+    \label{alg:v_stats}
+    \begin{algorithmic}[1]
+        \Require 
+            \Statex A kernel function $h: \samplespace^m \to \reals$ with multiplicative decomposition $(\calH, \calA)$
+            \Statex A sample list $\bm{X} \in \samplespace^n$ from a non-empty set $\samplespace$
+        \Ensure $V$-statistic $\vstat(h, \bm{X})$
+
+        \Function{Vstats}{($\calH, \bm{X}$}
+            \State $\bm{\calH} \gets$ \Call{Tensorization}{$\calH, \bm{X}$}
+            \Comment{Tensorize all the factors, See Algorithm~\ref{alg:tensorization}}
+            \State $v \gets \tensorcontraction(\bm{\calH}, \calA)$ 
+            \State \Return $v$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\subsection{Tensorization Algorithm of \pdfu{}-statistics}
+
+Unlike $V$-statistics, $U$-statistics can't be computed directly through tensor contraction so we decompose $U$-statistics to $V$-statistics at first and then compute those induced $V$-statistics through  tensor contraction and finally combine $V$-statistics to $U$-statistics. 
+
+\subsubsection{Decomposition of \pdfu{}-statistics}
+
+The decomposition components of $U$-statistics is defined as follows, which is $V$-statistics with the same kernel function and sample list with initial $U$-statistics and restricted by a partition. 
+
+\begin{definition}[Restricted $V$-statistics]\label{def:res_v_stat}
+    Let $\bbX$ be a non-empty set, $m, n$ be positive integers, $\sPi$ be a partition of set $[m]$ and $h: \bbX^{m} \rightarrow \bbR$ be a function defined on $\bbX^m$. For any tuple $\bm{X} \in \bbX^*$, the $V$-statistic with kernel $h$ restricted by partition $\sPi$ takes the following form 
+    \begin{align*}
+       \vstat[\sPi](h,\bm{X}) = \sum_{\alpha \in \vsetp{n}{\sPi}} h(\bm{X[\alpha]}). 
+    \end{align*}
+\end{definition}
+
+Then we state our main result of decomposition of $U$-statistics, 
+\begin{theorem}[Decomposition of $U$-statistics to $V$-statistics]\label{thm:decomp_u_to_v}
+ Let $\bbX$ be a non-empty set, $m$ be a positive integer, $\sPi$ be a partition of set $[m]$ and $h: \bbX^{m} \rightarrow \bbR$ be a function defined on $\bbX^m$. Then for any tuple $\bm{X} \in \bbX^n: n \geq m$, 
+\begin{align*}
+    \ustat(h,\bm{X}) = \sum_{\sPi \in \partitionp{m}} 
+    \mu_\sPi \vstat[\sPi](h, \bm{X}), 
+\end{align*}
+where
+\begin{align*}
+    \mu_\sPi = (-1)^{(m-|\sPi|)} \prod_{C \in \sPi} (|C| - 1)!. 
+\end{align*}
+\end{theorem}
+
+The proof of Theorem~\ref{thm:decomp_u_to_v} is deferred to Appendix~\ref{app:decomp_u_stats}.
+
+\subsubsection{Tensorization Algorithm}
+
+Having established decomposition of $U$-statistics, we now show our tensorization algorithm of $U$-statistics.
+
+Let $\ustatp{h}{\bm{X}}$ be a $m$-th order $U$-statistic with kernel function $h$ and sample list $\bm{X} \in \samplespace^n$ and $h$ have multiplicative decomposition $(\calH, \calA)$. The first step is the same as that for $V$-statistics---tensorization. 
+
+When computing $V$-statistics induced from $\ustatp{h}{\bm{X}}$, we mustn't repeat preforming tensorization for each of them---they can share the same tensor list and just differ from tensor expression. We just perform tensorization once as
+\begin{align*}
+    \bm{\calH} \gets  \textsc{Tensorizaion}(\calH, \bm{X}). 
+\end{align*}
+
+Then we apply different tensor expression to $\bm{\calH}$. The sub-expression for each $V$-statistic can be obtained by replacing indices which are in the same block of the partition to the same index, which is stated in Algorithm~\ref{alg:induced_expression}. Then for each $\sPi \in \partitionp{m}$, let $\calA_\sPi$ be expression induced from it, we can compute the $V$-statistic restricted by $\sPi$ as
+\begin{align}\label{eq:tensorization_res_v_stats}
+    \vstat[\sPi](h, \bm{X}) = & \ \vstatp{\bm{\calH}}{\calA_\sPi} \notag \\ 
+        = & \ \tensorcontraction(\bm{\calH}, \calA_\sPi). 
+\end{align}
+ Finally following Theorem~\ref{thm:decomp_u_to_v}, we can get $\ustatp{h}{\bm{X}}$ by combining those restricted $V$-statistics. 
+
+\begin{algorithm}
+    \caption{Induced Tensor Expression via Partition}
+    \label{alg:induced_expression}
+    \begin{algorithmic}[1]
+        \Require 
+        \Statex A tensor expression $\calA = (A_k)_{k=1}^K$ with index set $[m]$ 
+        \Statex A partition $\sPi \in \partitionp{m}$ of the index set $[m]$
+        \Ensure The tensor expression $\calA_\sPi$ induced by $\sPi$ on $\calA$
+
+        \Function{InducedExpression}{$\calA, \sPi$}
+            \State Let $(B_j)_{j=1}^J$ be a permutation of $\sPi$
+            \Comment{Label blocks by $j \in [J]$}
+            \State Define $\psi \colon [m] \to [J]$ as the block assignment map:
+            \Function{$\psi$}{$i$}
+                \State \Return $j$ where $i \in B_j$ 
+                \Comment{Map all indices in $B_j$  to $j$}
+            \EndFunction
+            \State Initialize $\calA_\sPi \gets \calA$
+            \For{$k \in [K]$}
+                \For{$i \in [|A_k|]$}
+                    \State $\calA_\sPi[k][i] \gets \psi(A_k[i])$
+                    \Comment{Replace index with its block label}
+                \EndFor
+            \EndFor
+            \State \Return $\calA_\sPi$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+Then we display the complete algorithm in Algorithm~\ref{alg:u_stats}. 
+
+\begin{algorithm}
+    \caption{Computation of $U$-statistics via Tensorization}
+    \label{alg:u_stats}
+    \begin{algorithmic}[1]
+        \Require 
+            \Statex A kernel function $h: \samplespace^m \to \reals$ with multiplicative decomposition $(\calH, \calA)$
+            \Statex A sample list $\bm{X} = (X_1, \dots, X_n) \in \samplespace^n$
+        \Ensure The $U$-statistic $\ustat(h, \bm{X})$ 
+
+        \Function{Ustats}{$\calH, \calA, \bm{X}$}
+            \State $\bm{\calH} \gets$ \Call{Tensorization}{$\calH, \bm{X}$}  
+            \Comment{Tensorize all the factors, See Algorithm~\ref{alg:tensorization}}
+            \State Initialize $u \gets 0$
+            \For{$\sPi \in \partitionp{m}$}  
+                \Comment{Iterate over all partitions of $[m]$}
+                \State $\mu_\sPi \gets (-1)^{m-|\sPi|} \prod_{C \in \sPi} (|C|-1)!$  
+                \Comment{Evaluate the coefficient, See Theorem~\ref{thm:decomp_u_to_v}}
+                \State $\calA_\sPi \gets$ \Call{InducedExpression}{$\calA, \sPi$}  
+                \Comment{Get expression induced by $\sPi$, See Algorithm~\ref{alg:induced_expression}}
+                \State $v_{\sPi} \gets \tensorcontraction(\bm{\calH}, \calA_\sPi)$  
+                \State $u \gets u + \mu_\sPi v_{\sPi}$  
+            \EndFor
+            \State \Return $u$  
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{De-diagonal Tensorization Algorithm}
+
+We observed that if we pre-process tensors in $\bm{\calH}$ through letting each diagonals of them be zero, we can skip some computation of tensor contraction. 
+
+
+
+\section{Chen's draft}
+\begin{definition}[Tensor Decomposition Space]\label{def:tensor_decomp_space}
+Let $m \in \mathbb{N}$. The \emph{tensor decomposition space of order $m$} is the set
+\begin{equation}
+\mytensorspacep{m} \coloneqq \left\{ (\mathcal{T}, \mathcal{A}) \,\middle|\, 
+\begin{aligned}
+    &\mathcal{A} = (A_r)_{r=1}^R \in [m]^{**},\ \cup_{r=1}^R \takesetp{A_r} = [m], \\
+    &\mathcal{T} = (T_r)_{r=1}^R,\ T_r : [n]^{|A_r|} \to \mathbb{R} \text{ for some fixed } n \in \mathbb{N}
+\end{aligned}
+\right\}.
+\end{equation}
+In particular, when $m = 0$, we define
+\begin{equation}
+   \mytensorspacep{0} \coloneqq \left\{ ( ( c ), ( ( ) ) ) \,\middle|\, c \in \mathbb{R} \right\}, 
+\end{equation}
+\end{definition}
+
+where the index decomposition $\mathcal{A} = (( ))$ consisting of the empty index decomposition, and the tensor component $\mathcal{T} = ( c )$ is a constant tensor. 
+The overall \emph{tensor decomposition space} is defined as
+\begin{equation}
+\mytensorspace \coloneqq \bigcup_{m = 0}^{\infty} \mytensorspacep{m}.
+\end{equation}
+
+
+
+\begin{remark}
+In this paper, the sample size $n \in \mathbb{N}$ is assumed to be fixed. Although the tensor decomposition space $\mytensorspacep{m}$ implicitly depends on $n$ through the definition of tensors $T_r : [n]^{|A_r|} \to \mathbb{R}$, we suppress this dependence in notation for clarity.
+\end{remark}
+
+\begin{definition}[Index Decomposition Space]\label{def:index_decomp_space}
+Let $m \in \mathbb{N}$. The \emph{index decomposition space of order $m$} is the set
+\begin{equation}
+\myindexspacep{m} \coloneqq \left\{ \mathcal{A} = (A_r)_{r=1}^R \in [m]^{**} \,\middle|\, \bigcup_{r=1}^R \takesetp{A_r} = [m] \right\}.
+\end{equation}
+In particular, when $m = 0$, we define $\myindexspacep{0} \coloneqq (( ))$, consisting of the empty index decomposition. The overall \emph{index decomposition space} is defined as
+\begin{equation}
+\myindexspace \coloneqq \bigcup_{m = 0}^{ + \infty} \myindexspacep{m}.
+\end{equation}
+\end{definition}
+
+
+\begin{remark}
+Each element $\mathcal{A} \in \myindexspacep{m}$ specifies a covering of the $m$ indices across $R$ subsets. It defines the contraction structure for a tensor expression, independent of tensor values. The tensor decomposition space $\mytensorspacep{m}$ can be seen as the set of tensor-valued instantiations over the structural patterns in $\myindexspacep{m}$.
+\end{remark}
+
+
+\begin{definition}[Projection to Index Decomposition]\label{def:projection_tensor_to_index}
+For each $m \in \mathbb{N}$, we define the projection map
+\begin{equation}
+\projectionindexp{m}: \mytensorspacep{m} \to \myindexspacep{m}, \quad (\mathcal{T}, \mathcal{A}) \mapsto \mathcal{A}.
+\end{equation}
+The global projection map is defined as
+\begin{equation}
+\projectionindex : \mytensorspace \to \myindexspace, \quad (\mathcal{T}, \mathcal{A}) \mapsto \mathcal{A},
+\end{equation}
+where $\projectionindex \mid_{\mytensorspacep{m}} = \projectionindexp{m}$ for all $m \in \mathbb{N}$.
+\end{definition}
+
+\begin{definition}[Index Summation Operator]\label{def:summing_operator}
+Let $i \in \mathbb{N}$ be an index. We define the summation operator
+\begin{equation}
+\sumonverindex{i}{\cdot} : \myindexspace \cup \mytensorspace \to \myindexspace \cup \mytensorspace
+\end{equation}
+as follows.
+
+For any index decomposition $\mathcal{A} = (A_r)_{r=1}^R \in \myindexspace$, define the sets
+\begin{align}
+\mathcal{A}_{\mathrm{in}} &\coloneqq \{ A_r \in \mathcal{A} \mid i \in A_r \}, \\
+\mathcal{A}_{\mathrm{out}} &\coloneqq \{ A_r \in \mathcal{A} \mid i \notin A_r \},
+\end{align}
+and define the merged index set
+\begin{equation}
+\widetilde{A} \coloneqq \bigcup_{A_r \in \mathcal{A}_{\mathrm{in}}} (A_r \setminus \{i\}).
+\end{equation}
+The result of summing over index $i$ is the new index decomposition
+\begin{equation}
+\sumonverindex{i}{\mathcal{A}} \coloneqq \mathcal{A}_{\mathrm{out}} \cup \{ \widetilde{A} \}.
+\end{equation}
+
+Now consider a tensor decomposition $(\mathcal{T}, \mathcal{A}) \in \mytensorspace$. Define $\mathcal{A}_{\mathrm{in}}, \mathcal{A}_{\mathrm{out}}, \widetilde{A}$ as above. Let $\mathcal{T} = (T_r)_{r=1}^R$, and define
+\begin{align}
+\mathcal{T}_{\mathrm{in}} &\coloneqq \{ T_r \mid A_r \in \mathcal{A}_{\mathrm{in}} \}, \\
+\mathcal{T}_{\mathrm{out}} &\coloneqq \{ T_r \mid A_r \in \mathcal{A}_{\mathrm{out}} \}.
+\end{align}
+Let $\{j_1, \dots, j_{d_i}\} = \widetilde{A}$ be the indices after removing $i$. Define the tensor $\widetilde{T} : [n]^{d_i} \to \mathbb{R}$ by
+\begin{equation}
+\widetilde{T}(x_{j_1}, \dots, x_{j_{d_i}}) \coloneqq \sum_{x_i = 1}^n \prod_{T_r \in \mathcal{T}_{\mathrm{in}}} T_r(\text{corresponding arguments}).
+\end{equation}
+We then define the new tensor decomposition
+\begin{equation}
+\sumonverindex{i}{(\mathcal{T}, \mathcal{A})} \coloneqq \left( \mathcal{T}_{\mathrm{out}} \cup \{ \widetilde{T} \}, \mathcal{A}_{\mathrm{out}} \cup \{ \widetilde{A} \} \right).
+\end{equation}
+
+In both cases, we use the same notation $\sumonverindex{i}{\cdot}$ for simplicity. The meaning is disambiguated by whether the input lies in the index decomposition space or tensor decomposition space.
+\end{definition}
+
+\begin{remark}[Computational Complexity]
+Let $d_i = \left| \bigcup_{A_r \in \mathcal{A}_{\mathrm{in}}} A_r \setminus \{i\} \right|$ be the order of the resulting tensor $\widetilde{T}$. Computing each entry of $\widetilde{T}$ requires $\mathcal{O}(n)$ operations, and there are $\mathcal{O}(n^{d_i})$ entries. Thus, the overall complexity is $\mathcal{O}(n^{d_i + 1})$.
+\end{remark}
+
+
+
+% \begin{figure}[h!]
+% \centering
+% \begin{tikzpicture}[node distance=4cm, >=Stealth, every node/.style={align=center}]
+%   % Nodes for spaces
+%   \node (tensor) [draw, rectangle, rounded corners, minimum width=3.5cm, minimum height=1cm] {Tensor Expression\\($\mytensorspace$)};
+%   \node (index) [draw, rectangle, rounded corners, right=of tensor, minimum width=3.5cm, minimum height=1cm] {Index Decomposition\\($\myindexspace$)};
+%   \node (graph) [draw, rectangle, rounded corners, right=of index, minimum width=3.5cm, minimum height=1cm] {Characteristic Graph\\($\mathcal{G}$)};
+  
+%   % Operator nodes (below each space)
+%   \node (opT) [below=1.8cm of tensor] {Summing over Index\\($\sumonverindex{}{}$)};
+%   \node (opI) [below=1.8cm of index] {Index Contraction\\($C_i$)};
+%   \node (opG) [below=1.8cm of graph] {Vertex Elimination\\($VE_i$)};
+  
+%   % Arrows between spaces with offset labels
+%   \draw[->] (tensor) -- (index) node[midway, above=0.5em] {Definition 1};
+%   \draw[->] (index) -- (graph) node[midway, above=0.5em] {Theorem 2};
+  
+%   % Arrows between operators with offset labels
+%   \draw[->] (opT) -- (opI) node[midway, below=0.5em] {Lemma A};
+%   \draw[->] (opI) -- (opG) node[midway, below=0.5em] {Lemma B};
+
+%   % Dashed arrows from space to operator
+%   \draw[dashed] (tensor) -- (opT);
+%   \draw[dashed] (index) -- (opI);
+%   \draw[dashed] (graph) -- (opG);
+% \end{tikzpicture}
+% \caption{ [\color{red} under Working] Correspondence between $\mathcal{T}$, $\mathcal{I}$, and $\mathcal{G}$ and their respective operators}
+% \end{figure}
+
+% \begin{table}[h!]
+% \centering
+% \begin{tabular}{|l|c|c|c|}
+% \hline
+% \textbf{Space} & \textbf{Tensor Expression Space} & \textbf{Index Decomposition Space} & \textbf{Characteristic Graph Space} \\
+% \hline
+% \textbf{Example} & $T^{ij}_{k} = A^i B^j C_k$ & Decompose $T$ via shared indices & Graph with vertices $i, j, k$ and edges from contractions \\
+% \hline
+% \textbf{Operator} & Sum over $k$: $\sum_k T^{ij}_{k}$ & Contract $k$ in decomposition & Eliminate vertex $k$ \\
+% \hline
+% \textbf{Example} & $T^{ij} = \sum_k A^i B^j C_k$ & Contraction: merge components on $k$ & Remove $k$, adjust adjacency \\
+% \hline
+% \end{tabular}
+% \caption{[\color{red} under Working]   Example of correspondence between spaces and operations}
+% \end{table}
+
+\section{old u,v}
+% \begin{definition}[$V$-statistics]\label{def:v_stat}
+%     Let $\bbX$ be a Banach space, $m$ be a positive integer, and $h: \bbX^{m} \rightarrow \bbR$ be a function defined on $\bbX^m$. For any finite set $\bm{X}$ of elements in $\bbX$ with cardinality greater than $m$, the $V$-statistic of kernel $h$ is defined as 
+%     \begin{align*}
+%         \vstat(h,\bm{X}) := \sum_{\underline{X} \in \vsetp{\bm{X}}{m}} h(\underline{X}).
+%     \end{align*}
+
+%     Here $h$ is called the kernel function of the $V$-statistic. Integer $m$ is called the order. Set $\bm{X}$ is called the sample set. 
+    
+% \end{definition}
+% \begin{definition}[U-set]\label{def:u_set}
+%     Assume that $S$ is a finite set and $\pi = \{B_k\}_{k=1}^K$ is a partition of integer set $[m]$, where $m \leq |S|$. The U-set of set $S$ restricted by partition $\pi$ is defined as
+%     \begin{align*}
+%         \{(s_1, s_2,\ldots,s_m) \in S^m | s_i = s_j, \;\mathrm{iff} \; \exists \, B \in \pi, \mathrm{s.t.} \, i,j \in B\}, 
+%     \end{align*}
+%     and is denoted by $\usetp{S}{\pi}$. If $\pi$ happens to be the finest partition of $[m]$, i.e. $\pi = \{\{k\}\}_{k=1}^m$, the corresponding U-set is denoted by $\usetp{S}{m}$. The size $K$ of partition $\pi$ is referred to as the order of $\usetp{S}{\pi}$.
+% \end{definition}
+
+% \begin{definition}[V-set]\label{def:v_set}
+%     Assume that $S$ is a finite set and $\pi = \{B_k\}_{k=1}^K$ is a partition of integer set $[m]$. The V-set of set $S$ restricted by partition $\pi$ is defined as
+%     \begin{align*}
+%         \{(s_1, s_2,\ldots,s_m) \in S^m | s_i = s_j, \forall \, B \in \pi, \forall \, i, j \in B\}, 
+%     \end{align*}
+%     and is denoted by $\vsetp{S}{\pi}$. If $\pi$ happens to be the finest partition of $[m]$, i.e. $\pi = \{\{k\}\}_{k=1}^m$, the corresponding V-set denoted by $\vsetp{S}{m}$. The size $K$ of partition $\pi$ is referred to as the order of $\vsetp{S}{\pi}$.
+% \end{definition}
+
+
+% \begin{definition}[Restricted $V$-statistics]\label{def:r_v_stat}
+%     Let $X$ be a Banach space, $m$ be positive integer, $h$ be a function defined on $X^m$. For any finite subset $\bm{X}$ of $X$ whose size is greater than $m$, $\pi$ is a partition of $[m]$. The $V$-statistic of kernel $h$ restricted by partition $\pi$ is defined as
+%     \begin{align*}
+%         \vstat[\pi](h,\bm{X}) := \sum_{\underline{X} \in \vsetp{\bm{X}}{\pi}} h(\underline{X}).
+%     \end{align*}
+% \end{definition}
+
+% \begin{theorem}[Decomposition of $U$-statistics to $V$-statistics]\label{thm:decomp_u_stats}
+% Let $\bbX$ be a Banach space, $m$ and $n$ be integers such that $m \leq n$, $h$ be a function defined on $\bbX^m$, and $\bm{X}$ be a subset of $X$ with $n$ elements. Then
+% \begin{align*}
+%     \ustat(h,\bm{X}) = \sum_{\substack{ \pi \in \partitionp{[m]} \\ \pi := \{B_k\}_{k=1}^K} } w_\pi \vstat[\pi](h, \bm{X}), 
+% \end{align*}
+% where
+% \begin{align*}
+%     w_\pi = (-1)^{\sum_{k=1}^{K}(|B_k|-1)} \prod_{k=1}^K (B_k-1)!. 
+% \end{align*}
+% \end{theorem}
+
+\section{old mul decomp}
+
+
+\begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+Assume $h : \samplespace^m \to \reals$ be a function. Let $\calA \coloneqq (A_r)_{r=1}^R \in [m]^{**}$ satisfies $\cup_{r=1}^R \takesetp{A_r} = [m]$. $\calH \coloneqq (h_r : \samplespace^{|A_r|} \to \reals)_{r=1}^R$ is a sequence of functions. $(\calH, \calA)$ is called a multiplicative decomposition of function $h$, if $\forall \underline{x} \in \samplespace^m$, 
+\begin{align*}
+    h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}[A_r]). 
+\end{align*}
+\end{definition}
+
+We now provide a more rigorous formulation. First, we construct a mapping from a kernel function to a graph. Next, we define a transformation on this graph that corresponds to summing over one index in the $V$-statistic defined by the kernel function. This transformation has a clear graphical interpretation. Finally, we show that by simplifying the graph of a kernel function into a simple graph, the treewidth of this graph serves as an exact bound on the computational complexity of the associated $V$-statistics.
+
+We begin by describing the multiplicative decomposition of a kernel function. \Lin{we probably should check if such a concept has been defined somewhere in math literature} Given the sample used to compute the $V$-statistic, both the specific value and the computational procedure of the $V$-statistic are entirely determined by its kernel function. 
+
+% \begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+%     Let $\cover:=\{C_r\}_{r=1}^R$ be a minimal cover of set $[m]$, $h: \bbX^m \to \bbR$ be a function and $\underline{x} := (x_1,\ldots,x_m)$ denote arguments of function $h$. Define $\underline{x}_{C_r} := \{x_j| j\in C_r\}$.  $\calH := \{h_r: \bbR^{|C_r|} \to \bbR\}_{r=1}^R$ is called a multiplicate decomposition of $h$, if there are permutations $\{\underline{x}_r \in \perm{\underline{x}_{C_r}}\}_{r=1}^R$, s.t. 
+%     \begin{align*}
+%         h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}_r).
+%     \end{align*}
+
+%     If the cover $\cover$ is non-trivial, the multiplicative decomposition is called non-trivial. If $C_p \not\subseteq C_q, \forall p,q \in[R]:p \neq q$, the multiplicative decomposition is called irreducible.
+% \end{definition}
+
+% \begin{definition}[Multiplicative Decomposition of Functions]\label{def:multiplicative_decomposition}
+% Assume $h : \samplespace^m \to \reals$ be a function. Let $\calA \coloneqq (A_r)_{r=1}^R \in [m]^{**}$ satisfies $\cup_{r=1}^R \takesetp{A_r} = [m]$. $\calH \coloneqq (h_r : \samplespace^{|A_r|} \to \reals)_{r=1}^R$ is a sequence of functions. $((h_r, A_r))_{r=1}^R$ is called a multiplicative decomposition of function $h$, if $\forall \underline{x} \in \samplespace^m$, 
+% \begin{align*}
+%     h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}[A_r]). 
+% \end{align*}
+     
+% \end{definition}
+% \begin{remark}
+%     Without loss of generality, we assume $\underline{x}_r$ is in increasing order because we can always redefine $h_r$ such that it holds. In this way, pair $(\calH, \cover)$ uniquely determine a multiplicative decomposition of function $h$ without providing permutations. 
+% \end{remark}
+\begin{remark}
+    When focusing solely on the computational procedure, the specific functional form—i.e., $\calH$—is not essential, as long as the functions involved are real-valued. What truly determines the computational process is the structure of the decomposition, which is described by the cover $\cover$. Therefore, we will use $\cover$ to capture the following concepts.
+\end{remark}
+
+Now, let's witness the beauty.
+
+\begin{definition}[Characteristic Graph]\label{def:graph}
+    Let $\cover := \{C_r\}_{r=1}^R$ be a minimal cover of the set $[m]$. A simple graph $G := (V, E)$—which allows isolated vertices but forbids multiple edges and self-loops—is called the \emph{characteristic graph of cover $\cover$}, denoted by $\graphcoverp{\cover}$, if it is constructed as follows:
+    \begin{enumerate}
+        \item The vertex set is $V := [m]$;
+        \item The edge set is $E := \{\{i,j\} \mid \exists \, C \in \cover \text{ such that } i, j \in C\}$.
+    \end{enumerate}
+
+    % If $(\calH, \cover)$ is a multiplicative decomposition of a kernel function $h$, then we define the \emph{characteristic graph of the kernel function $h$} as the characteristic graph of its associated cover $\cover$. Furthermore, the \emph{characteristic graph of a $V$-statistic} defined by the kernel $h$ is also defined as the characteristic graph of $h$, and thus ultimately determined by the cover $\cover$.
+\end{definition}
+\begin{remark}
+    The characteristic graph of different $\cover$ maybe same, for example, when $m=3$, $\cover_{1} = \{ \{ 1,2,3 \}\}$ and $\cover_{2} = \{ \{ 1,2\}, \{ 1,3\}, \{ 2, 3 \}\}$ both have the $3$-th order complete graph $K_{3}$ as their characteristic graph.
+\end{remark}
+
+
+% \begin{definition}[The map from $V$-stats to graph]
+% \label{def:map_V_stats_to_graph}
+% Given a $V$-statistics defined by the $m$-th order kernel function $h(\underline{x}) = \prod_{r=1}^R h_r(\underline{x}_r)$, we define a graph $G = (V, E)$ by the following rules:
+% \begin{itemize}
+%     \item every argument $x_i$ denotes a vertex $i$ in $G$.
+%     \item edge $\{i,j\}$ exists iff argument $x_{i}, x_{j}$ in some factor function $h_r(\underline{x}_r)$.
+% \end{itemize}
+% Actually, the graph defined above only depends on the cover of $[m]$ 
+% \end{definition}
+
+Now, consider the computation of an $m$-th order $V$-statistic. A natural—and the approach we adopt—is to iteratively sum over one index at a time. This process yields a sequence of lower-order $V$-statistics: the $(m-1)$-th, $(m-2)$-th, and so on, until it eventually reduces to a constant. At that point, the computation is complete. By comparing each induced $V$-statistic with the original one, we can naturally define a transformation on the corresponding graph that represents the operation of summing over a single index. The similar transformation concept was proposed in (?) named Vertex elimination. 
+
+
+\begin{definition}[Vertex elimination]
+\label{def:vertex_elimination_of_graph}
+    Let $G$ be a graph. We define the operation $\phi_{v}$ of eliminating vertex $v \in \verticesg{G}$ from $G$ is as
+    \begin{enumerate}[label = (\roman*)]
+        \item connecting all neighbors of $v$ to form a clique i.e. complete subgraph, and
+        \item deleting vertex $v$ from $G$. 
+    \end{enumerate}
+    We denote the resulting graph as $
+    \eliminatevg{v}{G}$. 
+    % The graph of eliminate vertex $v$ from graph $G$ is graph constructed from deleting $v$ from $G$ and connecting all neighbors of vertex $v$ to each other, denoted by $\eliminatevg{v}{G}$. More specifially:
+    % \begin{align*}
+    %     \eliminatevg{v}{G} = (\verticesg{G} \backslash \{v\}, (\edgesg{G} \backslash E_1) \cup E_2),
+    % \end{align*}
+    % where $E_1 = \{e\in \edgesg{G}:v\in e\}$ and $E_2 = \{\{v_1,v_2\}: v_1, v_2 \in \neighborsvg{v}{G}, \, v_1 \neq v_2\}$.
+\end{definition}
+
+
+
+\begin{definition}[Tensor Expression]\label{def:tensor_expression}
+    Let $m$ be a nonnegative integer, a tuple $\calA \coloneqq (A_r)_{r=1}^R \in [\naturals]_+^{**}$ is defined as a $m$-th order tensor expression if $|\cup_{r=1}^R \takesetp{A_r}| = m$. 
+
+    Each integer appears in $\calA$ is referred as to be an index of expression $\calA$. All the integers is referred as to the index set of expression $\calA$, denoted by $\indexset(\calA)$.
+
+    The tensor expression $\calA$ is standard, if $\indexset(\calA) = [m]$. 
+    
+    A tuple of tensors $(H_r)_{r=1}^{R}$ is admissible to expression $\calA$, if
+    \begin{align*}
+        \ndimp{H_r} = |A_r|, \, \forall \, r \in [R]. 
+    \end{align*}
+\end{definition}
+
+\todo{establish equivalence between tensor expressions, especially standard and others}
+
+% \begin{definition}
+%     Let $\calA$ and $\calB$ be tensor expressions. $\calB$ is equivalent to $\calA$, if for any tensor tuple $\calH$ admissible to $\calA$, 
+%     \begin{enumerate}
+%         \item $\calH$ is admissible to $\calB$, 
+%         \item $|\calA| = |\calB|$. 
+%     \end{enumerate}
+% \end{definition}
+
+% \begin{definition}[Tensor Contraction]\label{def:tensor_contraction}
+%     Let $(\calA \coloneqq (A_r)_{r=1}^R, B)$ be a $m$-th order tensor and $(H_r)_{r=1}^R$ be a legal tensor sequence to $(\calA, B)$. Tensor $H$ is contraction of tensors  $(H_r)_{r=1}^R$ under expression $(\calA, B)$, if $\forall \underline{i} \in [\dim[B[1]]] \times \cdots \times [\dim[B[|B|]]]$, 
+%     \begin{align*}
+%         H[\underline{i}] = \sum_{\underline{j}\in \{ \underline{k} \in [\dim[1]] \times \cdots [\dim[m]] \mid \underline{k}[B] = \underline{i}\}} \prod_{r=1}^R H_r[\underline{j}[A_r]]
+%     \end{align*}
+% \end{definition}
+
+\begin{definition}[Tensor Contraction]\label{def:tensor_contraction}
+    Suppose that $\calA \coloneqq (A_r)_{r=1}^R$ is a standard $m$-th order tensor expression and $\calH := (H_r)_{r=1}^R$ is an admissible tensor tuple to $\calA$ with size $n$. The contraction of tensors $(H_r)_{r=1}^R$ under expression $\calA$ is defined as
+    \begin{align*}
+        \sum_{\alpha \in [n]^m} \prod_{r=1}^R H_r(\alpha[A_r]),  
+    \end{align*}
+    which is denoted by $\tensorcontraction(\calH, \calA)$.
+\end{definition}
+
+\begin{lemma}
+\label{lem:partial_order_partition}
+Let $\pi^{\prime} = \{ B_1, B_2, \dots, B_K \}$ be a partition of $[m]$. Then $\pi \preceq \pi^{\prime}$ if and only if $\pi$ can be written as
+\begin{align*}
+\pi = \{ A_{1,1}, A_{1,2}, \dots, A_{1,r_1}, A_{2,1}, \dots, A_{2,r_2}, \dots, A_{K,1}, \dots, A_{K,r_K} \},
+\end{align*}
+where, for each $k = 1, 2, \dots, K$, the collection $\{ A_{k,1}, \dots, A_{k,r_k} \}$ is a partition of $B_k$.
+
+In other words, there exists a bijection
+\begin{align*}
+\Phi_{\pi^{\prime}} : \{ \pi \in \partitionp{[m]} : \pi \preceq \pi^{\prime} \} &\to \bigotimes_{k=1}^{K} \partitionp{B_k}, \\
+\Phi_{\pi^{\prime}}(\pi) &= (\pi_1, \pi_2, \dots, \pi_K),
+\end{align*}
+where each $\pi_k = \{ A_{k,1}, \dots, A_{k,r_k} \} \in \partitionp{B_k}$ is the restriction of $\pi$ to $B_k$.
+\end{lemma}
+
+% We first introduce a recursive structure underlying the decomposition of $U$-statistics (Lemma~\ref{lem:first_decompose_U}). To formalize this, we generalize the formula in Theorem~\ref{thm:decomp_u_to_v} to the more flexible expression given in Proposition~\ref{pro:re_decomp_u_stats}. This proposition is then proved by induction, relying on a careful analysis of set partitions (Lemma~\ref{lem:partial_order_partition}) and a crucial identity involving Stirling numbers of the second kind (Lemma~\ref{lem:stirling_identity}).
+
+Before delving into the main argument, we introduce two essential combinatorial tools. The Stirling numbers of the second kind and their associated identity will appear in the final steps of the proof to handle coefficient cancellations. The partial order on set partitions will allow us to precisely track how recursive refinements occur in the decomposition of $U$-statistics.
+
+Intuitively, the relation $\pi \pleq \pi^{\prime}$ means that $\pi$ is a refinement of $\pi^{\prime}$: each block in $\pi$ is entirely contained within some block of $\pi^{\prime}$. In other words, $\pi$ has more (or at least as many) blocks than $\pi^{\prime}$, providing a finer description of the set $[m]$. 
+
+Equivalently, if we think of each block in $\pi$ as an individual "index", then $\pi^{\prime}$ corresponds to a grouping of these indices into larger blocks. The following lemma formalizes this relationship from the reverse perspective: it fixes a coarse partition $\pi^{\prime}$ and characterizes all finer partitions $\pi \pleq \pi^{\prime}$, which will be useful in the main proof.
+
+
+\begin{proof}
+    Suppose first that $\pi \pleq \pi^{\prime}$, and let $\pi^{\prime} = \{ B_1, \dots, B_K \}$. By definition, each block of $\pi$ must be fully contained in some block $B_k$ of $\pi^{\prime}$. This implies that we can group the blocks of $\pi$ according to which $B_k$ they are contained in. Denote the subset of blocks of $\pi$ contained in $B_k$ as $\pi_k = \{ A_{k,1}, \dots, A_{k,r_k} \}$. Since $\pi$ is a partition of $[m]$ and the $B_k$ are disjoint, it follows that each $\pi_k$ is a partition of $B_k$, and $\pi = \bigcup_{k=1}^K \pi_k$.
+    
+    Conversely, suppose we are given partitions $\pi_k \in \partitionp{B_k}$ for each $k = 1, \dots, K$. Since the $B_k$ are disjoint, their union covers $[m]$, and the union of all the $\pi_k$ gives a partition $\pi$ of $[m]$. Furthermore, each block of $\pi_k$ is contained in $B_k$, so every block of $\pi$ is contained in some $B_k \in \pi^{\prime}$, implying $\pi \pleq \pi^{\prime}$.
+    
+    Therefore, the two sets are equal as claimed.
+\end{proof}
+
+% \begin{proof}
+% It suffices to show that the family $\{ \usetp{\bm{X}}{\pi} \}_{\pi \in \partitionp{[m]}}$ forms a disjoint partition of $\vsetp{\bm{X}}{\pi_{0,m}} = \bm{X}^m$.
+
+% \textbf{(1) Coverage.}  
+% For any tuple $\bm{X} = (x_1, \dots, x_m) \in \bm{X}^m$, define a partition $\pi_{\bm{x}}$ by letting $i \sim j$ if and only if $x_i = x_j$. This induces a unique partition $\pi_{\bm{x}} \in \partitionp{[m]}$, with $\bm{x} \in \usetp{\bm{X}}{\pi_{\bm{x}}}$.
+
+% \textbf{(2) Disjointness.}  
+% If $\bm{x} \in \usetp{\bm{X}}{\pi} \cap \usetp{\bm{X}}{\pi^{\prime}}$ for $\pi \neq \pi^{\prime}$, then $\bm{x}$ would admit two distinct equality patterns, contradicting the uniqueness of $\pi_{\bm{x}}$.
+
+% Hence,
+% \begin{align}
+%     \vsetp{\bm{X}}{\pi_{0,m}} = \biguplus_{\pi \in \partitionp{[m]}} \usetp{\bm{X}}{\pi}.
+% \end{align}
+
+% Applying $h$ over both sides and collecting terms yields:
+% \begin{align*}
+%     \vstat[\pi_{0,m}](h, \bm{X}) 
+%     = \ustat[\pi_{0,m}](h, \bm{X}) 
+%     + \sum_{\substack{ \pi \in \partitionp{[m]} \\ \pi \pgreater \pi_{0,m}}} \ustat[\pi](h, \bm{X}),
+% \end{align*}
+% which rearranges to the desired identity.
+% \end{proof}
+
+\begin{definition}[Stirling Number of the Second Kind]
+\label{def:stirling_number}
+    Let $n,k$ be integers satisfies $n \geq k$, Stirling number of the second kind $S(n, k)$ is the number of all partitions whose size is $k$ of a set whose size is $n$. It satisfies the recurrence relation 
+    \begin{align*}
+        S(n, k) = k S(n-1, k) + S(n-1, k-1),
+    \end{align*}
+    with initial conditions $S(0, 0) = 1$ and $S(n, 0) = S(0, k) = 0$ for all integers $n, k > 0$.
+\end{definition}
+
+We will use the following identity to get the final step in the proof. 
+
+Following the generating function of Stirling number given by Equation I.B in Section 24.1.4 of \cite{abramowitz1948handbook}
+\begin{align*}
+    x^n = \sum_{k=0}^{n} S(n, k) \prod_{r=0}^{k-1} (x-r).
+\end{align*}
+we have the following identity
+\begin{lemma}[Identity of Stirling Number]
+    \label{lem:stirling_identity}
+    For any integer $n \geq 2$, it holds that
+    \begin{align*}
+        \sum_{k=1}^{n} (-1)^k (r-1)! S(n, k) = 0.
+    \end{align*}
+\end{lemma}
+
+
+Rewriting Lemma~\ref{lem:decomp_v_to_u}, we have
+\begin{align}
+    \ustat(h,\bm{X}) = \vstat( h, \bm{X}) 
+    - \sum_{\substack{ \pi \in \partitionp{[m]} \\ \pi \pgreater \pi_{0,m}}} \ustat[\pi](h, \bm{X}), 
+\end{align}
+which reveals a recursive structure of $U$-statistics---an high order $U$-statistic can be written as a $V$-statistic of the same order subtracting a linear combination of lower-order $U$-statistics and these low-order $U$-statistics can be decomposed to $V$-statistics by the same way, which introduces the decomposition from $U$-statistics to $V$-statistics. Since any $1$-st order $U$-statistic coincides with the corresponding $V$-statistic, the recursion must terminate. This further implies that any $U$-statistic must be able to be expressed as a linear combination of $V$-statistics. Now we are ready to introduce the following reformulation of Theorem~\ref{thm:decomp_u_to_v}.
+
+\begin{proof}[Proof of Theorem~\ref{thm:ext_decomp_u_to_v}]
+We proceed by the proof by induction on the cardinality of partition $\pi$. 
+
+{\bf Base case: $|\pi| = 1$]}
+
+Then $\pi = \{[m]\}$. Following Corollary~\ref{cor:decomp_v_to_u}, we have the statement holds for base case. 
+
+{\bf Inductive Hypothesis}
+Assume that the proposition holds for all $ m < M $. Now fix $ m = M $, first we can show the result is true for all $\pi \pgreater \pi_{0,M}$. Consider a partition $\pi \pgreater \pi_{0,M} $, i.e. $ m_\pi \coloneqq |\pi| \pless M $. Let $ \pi = \{A_1, \dots, A_{m_\pi}\} $. Then the term $ \ustat[\pi](h, \bm{X}) $ corresponds to a $m_\pi$-th $ U $-statistic. By the inductive hypothesis, such terms should be covered. We explicitly identify this quantity and verify its inclusion under the inductive assumption.
+
+
+First define a function $h^{\pi}: X^{m_\pi} \to \mathbb{R}$ by:
+\begin{align*}
+    h^{\pi}(x_1, \dots, x_{m_\pi}) \coloneqq h(y_1, \dots, y_M),
+\end{align*}
+where $y_i = x_k$ for all $i \in A_k$. That is, $h^{\pi}$ is obtained from $h$ by identifying the arguments according to the blocks of $\pi$.
+
+Then, by the definition of structured $U$-statistics:
+\begin{align}
+\label{equ:proof_u2v_part_2_equ_1}
+    \ustat[\pi](h, \bm{X}) = \ustat[\pi_{0, m_\pi}](h^{\pi}, \bm{X}).
+\end{align}
+
+Let $\mathcal{P}_\pi := \{ \pi^{\prime} \in \partitionp{[M]} : \pi^{\prime} \geq \pi \}$. There is a natural bijection defined by seeing every block $A_k \in \pi$ as a single index $k$:
+\begin{align*}
+    \phi_{\pi}: \partitionp{[m_\pi]} \to \mathcal{P}_\pi
+\end{align*}
+defined by sending each $\tilde{\pi} = \{B_1, \dots, B_K\}$ to $\pi^{\prime} = \phi_{\pi}(\tilde{\pi}) = \{ B'_k \}_{k=1}^K$ where $B'_k = \bigcup_{i \in B_k} A_i$.  
+
+By the inductive hypothesis,
+\begin{align}
+\label{equ:proof_u2v_part_2_equ_2}
+    \ustat[\pi_{0, m_\pi}](h^\pi, \bm{X}) 
+    = \sum_{\tilde{\pi} \in \partitionp{[m_\pi]}} 
+    w_{\pi_{0, m_\pi}, \tilde{\pi}} \vstat[\tilde{\pi}](h^\pi, \bm{X}).
+\end{align}
+% \Zhang{please prove the equation} 
+% \Chen{ just definition, weight function $w_{\cdot,\cdot}$ is clear, bijection $\phi_{\pi}$ is clear.}
+Under the bijection $\phi_{\pi}$ and the easy fact $w_{\pi_{0, m_\pi},\tilde{\pi}} = w_{\pi, \phi_{\pi}(\tilde{\pi})}$, we have:
+\begin{align}
+\label{equ:proof_u2v_part_2_equ_3}
+    \sum_{\tilde{\pi} \in \partitionp{[m_\pi]}} w_{\pi_{0, m_\pi},\tilde{\pi}} \vstat[\tilde{\pi}](h^\pi, \bm{X}) = \sum_{\pi^{\prime} \in \mathcal{P}_\pi}  w_{\pi, \pi^{\prime}} \vstat[\phi_{\pi}(\tilde{\pi})](h, \bm{X}),
+\end{align}
+Then combining \eqref{equ:proof_u2v_part_2_equ_1}, \eqref{equ:proof_u2v_part_2_equ_2} and \eqref{equ:proof_u2v_part_2_equ_3}, we obtain:
+\begin{align*}
+     \ustat[\pi](h, \bm{X}) 
+    = \sum_{\substack{ \pi^{\prime} \in \partitionp{[m]} \\ \pi^{\prime} \pgeq \pi }}   \vstat[\pi^{\prime}](h, \bm{X}),
+\end{align*}
+Since $\pi$ was arbitrary, the result holds for all $\pi \pgreater \pi_{0,M}$.
+
+\textbf{(3) Induction step B: The finest partition $\pi = \pi_{0,m}$.}  
+
+Following Lemma~\ref{lem:decomp_v_to_u}, we have
+\begin{align*}
+    \ustat[\pi_{0,M}](h,\bm{X}) 
+    &= \vstat[\pi_{0,M}]( h, \bm{X}) 
+    - \sum_{\substack{ \pi \in \partitionp{[M]} \\ \pi \pgreater \pi_{0,M}}} \ustat[\pi](h, \bm{X}) \\
+    \text{(By Induction Step A)}\quad 
+    &= \vstat[\pi_{0,M}]( h, \bm{X}) 
+    - \sum_{\substack{ \pi \in \partitionp{[M]} \\ \pi \pgreater \pi_{0,M}}} \sum_{\substack{ \pi^{\prime} \in \partitionp{[M]} \\ \pi^{\prime} \geq \pi}}  
+    w_{\pi, \pi^{\prime}}  \vstat[\pi^{\prime}](h, \bm{X}) \\
+    \text{(Switching the order of summation)}\quad 
+    &= \vstat[\pi_{0,M}]( h, \bm{X}) 
+    + \sum_{\substack{ \pi^{\prime} \in \partitionp{[M]} \\ \pi^{\prime} \pgreater \pi_{0,M}}} \left(  - \sum_{\substack{ \pi \in \partitionp{[M]} \\  \pi_{0,M} \pless \pi \pleq \pi^{\prime} }}   w_{\pi, \pi^{\prime}} \right) \vstat[\pi^{\prime}](h, \bm{X}).
+\end{align*}
+
+Therefore, to complete the induction, it suffices to show that for each fixed $\pi^{\prime} = \{ B_k \}_{k=1}^{K}$ with $\pi^{\prime} \pgreater \pi_{0,M}$, the following identity holds:
+\begin{align*}
+   -  \sum_{\substack{ \pi \in \partitionp{[M]} \\ \pi_{0,M} \pless \pi \pleq \pi^{\prime} }}   w_{\pi, \pi^{\prime}}  =    w_{\pi_{0,M}, \pi^{\prime}},
+\end{align*}
+which can be simplified as:
+\begin{align}\label{equ:decompose_U_to_V_final_weight}
+    \sum_{\substack{ \pi \in \partitionp{[M]} \\  \pi \pleq \pi^{\prime} }}   w_{\pi, \pi^{\prime}}  = 0.
+\end{align}
+
+To this end, recall Lemma~\ref{lem:partial_order_partition}. Any partition $\pi$ satisfying $ \pi \pleq \pi^{\prime}$ can be written as:
+
+\begin{align*}
+    \pi = \{ A_{1,1}, A_{1,2}, \dots, A_{1,r_1},\; A_{2,1}, \dots, A_{2,r_2},\; \dots,\; A_{K,1}, \dots, A_{K,r_K} \},
+\end{align*}
+where each $\pi_k := \{ A_{k,1}, \dots, A_{k,r_k} \}$ is a partition of $B_k$. By definition in \eqref{equ:definition_rho}, we have $\rho_{\pi,B_k} =  |\pi_k| = r_k$.  Denoting $\alpha_{r_k} = (-1)^{r_k - 1} (r_k -1)!$, then:
+\begin{align*}
+    w_{\pi, \pi^{\prime}} =  \prod_{k=1}^{K} \left[ (-1)^{|\pi_k| - 1} (|\pi_k| -1)! \right] = \prod_{k=1}^{K}  \alpha_{r_k}.
+\end{align*}
+
+Note that $\alpha_{|\pi_k|}$ depends only on the size $ |\pi_k|$, and not on the specific structure of $\pi_k$. Now recall the definition of the Stirling numbers of the second kind (see Definition~\ref{def:stirling_number}), for every set $B_k \in \pi^{\prime}$ with $|B_k| = n_k$, the number of partitions $\pi_k$ of $B_k$ into exactly $r_k$ subsets is given by $S(n_k, r_k)$.
+Then, leveraging the one-to-one correspondence described in Lemma~\ref{lem:partial_order_partition} for the characterization of all partitions $\pi$ satisfying $\pi \pleq \pi^{\prime}$, we obtain:
+
+\begin{align}
+    \sum_{\substack{ \pi \in \partitionp{[M]} \\  \pi \pleq \pi^{\prime} }}   w_{\pi, \pi^{\prime}}
+    &=  \sum_{\pi_1 \in \partitionp{B_1}} \cdots \sum_{\pi_K \in \partitionp{B_K}} \prod_{k=1}^{K} \left[ (-1)^{| \pi_{k} | - 1} (| \pi_{k} | -1)! \right]  \notag \\
+    & = \sum_{\pi_1 \in \partitionp{B_1}} \cdots \sum_{\pi_K \in \partitionp{B_K}} \prod_{k=1}^{K}  \alpha_{| \pi_{k} |} \notag \\
+    & = \prod_{k=1}^{K}  \left( \sum_{\pi_k \in \partitionp{B_k}}    \alpha_{| \pi_{k} |} \right) \notag \\
+    &= \prod_{k=1}^{K} \left\{  \sum_{r_k =1}^{n_k} \alpha_{r_k} S(n_k, r_k) \right\}. \label{equ:proof_U2V_final_step}
+\end{align}
+
+Now, by Lemma~\ref{lem:stirling_identity}, for $n_k \geq 2$, we have
+\begin{align*}
+    \sum_{r_k =1}^{n_k} \alpha_{r_k} S(n_k, r_k) 
+    =  - \sum_{r_k =1}^{n_k} (-1)^{r_k} (r_k -1)! S(n_k,r_k) = 0.
+\end{align*}
+And when $n_k = 1$, clearly $\sum_{r_k =1}^{1} \alpha_{r_k} S(1, r_k) = 1 $. Since $\pi^{\prime} \pgreater \pi_{0,M}$, there must exist some $k$ such that $| B_k | = n_k \geq 2$. Therefore, at least one factor in the product in \eqref{equ:proof_U2V_final_step} vanishes to zero, implying \eqref{equ:decompose_U_to_V_final_weight} is true.
+
+There are some basic properties used to help to prove Theorem~\ref{thm:decomp_u_to_v}.
+\begin{lemma}[Properties of Refinement]\label{lem:properties_refinement}
+    Let $S$ be a non-empty set. Then
+    \begin{enumerate}
+        \item The refinement relationship defined in Definition~\ref{def:refinement_of_partition} constructs a partial order on $\partitionp{S}$.
+        \item $\{\{s\} \mid s \in S\} \pleq \pi \pleq \{S\}, \; \forall \pi \in \partitionp{S}$. 
+        \item $|\pi| \geq |\pi^\prime|, \; \forall \pi,\pi^\prime \in \partitionp{S}: \pi \pleq \pi^\prime$ and the "$=$" holds if and only if $\pi = \pi^\prime$.
+        \item Let $\pi^\prime \in \partitionp{S}$, then $\{\{A \in \pi \mid A \subseteq B\} \mid \pi \pleq \pi^\prime\} = \partitionp{B}, \; \forall B \in \pi^\prime$. 
+        \item Let $\pi \in \partitionp{S}$, then $\{\{\{ A \in \pi \mid A \subseteq B\} \mid B \in \pi^\prime\} \mid \pi \pleq \pi^\prime \} = \partitionp{\pi}$. 
+    \end{enumerate}
+\end{lemma}
+
+\begin{remark}
+    We call partitions showed in second part of Proposition~\ref{lem:properties_refinement} is the finest partition and the coarsest partition of a set. For sake of convenience, we denote the finest of integer set $[m]$ by $\finestp{m}$ and the coarsest by $\coarsestp{m}$.
+\end{remark}
+\begin{proof}[Proof of Theorem~\ref{thm:ext_decomp_u_to_v}]
+    We proceed by the proof by induction on the cardinality of partition $\pi$. 
+    
+    {\bf (1) Base case}
+    
+    If $|\pi| = 1$, then $\pi = \{[m]\}$. Following Corollary~\ref{cor:decomp_v_to_u}, we have that the statement holds for base case. 
+    
+    {\bf (2) Inductive Hypothesis}
+    
+    Assume that the statement holds for any $\rho \in \partitionp{[m]}: |\rho| < M$, where $M$ is a positive integer. 
+    
+    {\bf (3) Inductive Step}
+    
+    We now prove that the statement holds for any $\pi \in \partitionp{[m]}: |\pi| = M$. 
+    
+    Following the third part of Lemma~\ref{lem:properties_refinement}, we have for any $\rho \pgreater \pi$, $|\rho| < |\pi|$. Then following the inductive hypothesis, we have the statement holds for any $\rho \pgreater \pi$, i.e.
+    \begin{align}\label{eq:decomp_coarser_u_to_v}
+        \ustat[\rho](h,\bm{X}) 
+        = \sum_{\substack{ \pi^{\prime\prime} \in \partitionp{[m]} \\ \rho \pleq \pi^{\prime\prime}}}  
+        w_{\rho, \pi^{\prime\prime}}  \vstat[\pi^{\prime\prime}](h, \bm{X}), \quad \forall \rho: \pi \pless \rho. 
+    \end{align}
+
+    By rewriting Lemma~\ref{lem:decomp_v_to_u}, we have
+    \begin{align*}
+        \ustat[\pi](h,\bm{X}) =& \vstat[\pi]( h, \bm{X}) 
+        - \sum_{\substack{ \rho \in \partitionp{[m]} \\ \pi \pless \rho}} \ustat[\pi](h, \bm{X}) \\
+        =& \vstat[\pi]( h, \bm{X}) 
+        - \sum_{\substack{ \rho \in \partitionp{[m]} \\ \pi \pless \rho}} \sum_{\substack{ \pi^{\prime\prime} \in \partitionp{[m]} \\ \rho \pleq \pi^{\prime\prime}}}  
+        w_{\rho, \pi^{\prime\prime}}  \vstat[\pi^{\prime\prime}](h, \bm{X}), 
+    \end{align*}
+    where the second step follows Equation~\ref{eq:decomp_coarser_u_to_v}. 
+    
+    By switching the summation order, we have
+    \begin{align}\label{eq:decmop_coeff}
+        \ustat[\pi](h,\bm{X}) =& \vstat[\pi]( h, \bm{X}) 
+        - \sum_{\substack{ \pi^{\prime\prime} \in \partitionp{[m]} \\ \pi \pless \pi^{\prime\prime}}} \sum_{\substack{ \rho \in \partitionp{[m]} \\ \pi \pless \rho \pleq \pi^{\prime\prime}}}
+        w_{\rho, \pi^{\prime\prime}}  \vstat[\pi^{\prime\prime}](h, \bm{X}) \notag \\
+        =& \vstat[\pi]( h, \bm{X}) + \sum_{\substack{ \pi^{\prime\prime} \in \partitionp{[m]} \\ \pi \pless \pi^{\prime\prime}}} (-\sum_{\substack{ \rho \in \partitionp{[m]} \\ \pi \pless \rho \pleq \pi^{\prime\prime}}}
+        w_{\rho, \pi^{\prime\prime}}) \vstat[\pi^{\prime\prime}](h, \bm{X})
+    \end{align}
+
+    We complete the proof by comparing coefficients with ones in Theorem~\ref{thm:ext_decomp_u_to_v} as follows:
+
+    {\bf (3.1) $\pi^{\prime\prime} = \pi$}
+    
+    It's to prove that 
+    \begin{align*}
+        w_{\pi, \pi} = 1. 
+    \end{align*}
+    Following Definition~\ref{def:partition}, for any $B \in \pi$, there only exists one set in $\pi$ which is $B$ it self is subset of $B$. Then we have $\rho_{\pi, B} = 1$, which implies that $w_{\pi, \pi} = 1$. 
+
+    {\bf (3.1) $\pi^{\prime\prime} \pgreater \pi$}
+
+    It's to prove that
+    \begin{align*}
+        -\sum_{\substack{ \rho \in \partitionp{[m]} \\ \pi \pless \rho \pleq \pi^{\prime\prime}}}
+        w_{\rho, \pi^{\prime\prime}} = w_{\pi,\pi^{\prime\prime}}, 
+    \end{align*}
+    i.e.
+    \begin{align}\label{eq:summation_w}
+        \sum_{\substack{ \rho \in \partitionp{[m]} \\ \pi \pleq \rho \pleq \pi^{\prime\prime}}}
+        w_{\rho, \pi^{\prime\prime}} = 0. 
+    \end{align}
+
+    \end{proof}
+\end{proof}
+
+\begin{definition}[Stirling Number of the Second Kind]
+\label{def:stirling_number}
+    Let $n,k$ be integers satisfies $n \geq k$, Stirling number of the second kind $\stirlingp{n}{k}$ is the number of all partitions whose cardinality is $k$ of a set whose cardinality is $n$. It satisfies the recurrence relation 
+    \begin{align*}
+        \stirlingp{n}{k} = k \stirlingp{n-1}{k} + \stirlingp{n-1}{k-1},
+    \end{align*}
+    with initial conditions $\stirlingp{0}{0} = 1$ and $\stirlingp{n}{0} = \stirlingp{0}{k} = 0$ for all integers $n, k > 0$.
+\end{definition}
+
+We will use the following identity to get the final step in the proof. 
+
+Following the generating function of Stirling number given by Equation I.B in Section 24.1.4 of \cite{abramowitz1948handbook}
+\begin{align*}
+    x^n = \sum_{k=0}^{n} \stirlingp{n}{k} \prod_{r=0}^{k-1} (x-r).
+\end{align*}
+we have the following identity
+\begin{lemma}[Identity of Stirling Number]
+    \label{lem:stirling_identity}
+    For any integer $n \geq 2$, it holds that
+    \begin{align*}
+        \sum_{k=1}^{n} (-1)^k (k-1)! \stirlingp{n}{k} = 0.
+    \end{align*}
+\end{lemma}
+
+Now we are ready to prove Theorem~\ref{thm:ext_decomp_u_to_v}.
+\end{document}

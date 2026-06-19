@@ -1,0 +1,193 @@
+\documentclass[11pt]{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Internal revision TO-DO checklist -- companion to response.tex.
+%
+% The items are ordered by WHERE the change is made in the manuscript (front to
+% back), so this doubles as a revision work-plan: go through the paper top to
+% bottom and tick each box.
+%   Tags:  [R1.x]/[R2.x] = which referee comment it answers;
+%          (minor)/(clear) = quick, self-contained edits;
+%          (substantial)   = needs new text, examples, or analysis.
+%
+% NOTE: compile with the working directory at the PROJECT ROOT (as Overleaf does),
+% so the manuscript cross-references (\ref, \pageref) resolve from the committed
+% label snapshot (Statistics_and_computing_submission/ustats_revision_labels.aux).
+% Each \ref/\pageref shows the CURRENT manuscript number/page.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage[svgnames]{xcolor}
+\usepackage[colorlinks=true, linkcolor=teal, citecolor=blue, urlcolor=blue]{hyperref}
+
+% manuscript cross-references (same robust setup as response.tex)
+\usepackage{xr-hyper}
+\IfFileExists{ustats_revision.aux}{%
+  \externaldocument{ustats_revision}%
+}{\IfFileExists{Statistics_and_computing_submission/ustats_revision.aux}{%
+  \externaldocument{Statistics_and_computing_submission/ustats_revision}%
+}{%
+  \externaldocument{Statistics_and_computing_submission/ustats_revision_labels}%
+}}
+
+\newcommand{\bx}{$\square$\ }   % an open checkbox; change to $\boxtimes$ when done
+\newcommand{\at}[1]{\textbf{#1}} % a manuscript location
+
+\title{Revision To-Do Checklist\\[-0.2em]
+\large (companion to \texttt{response.tex}, ordered by manuscript location)}
+\date{\today}
+\author{}
+
+\begin{document}
+\maketitle
+\vspace{-2.5em}
+
+\noindent
+The tasks are ordered by where the edit goes in the manuscript (front to back).
+Tags: \textbf{[R1.4]} = Referee~1's 4th major comment, \textbf{[R2.2]} = Referee~2's
+2nd comment, \textbf{[R1.8, minor]} = a minor comment; \emph{(clear/minor)} = quick
+edit, \emph{(substantial)} = needs new material. Manuscript numbers/pages are
+cross-referenced and update automatically.
+
+\medskip
+
+\noindent\textbf{Progress (2026-06-18): 5 done, 4 partial, 8 open.}
+\emph{Label snapshot refreshed 2026-06-18. The new index-wise/tensor-wise
+appendix is now Appendix~\ref{app:index_tensor} (the later appendices shift one
+letter); the cross-references below already show the new numbering.}
+
+\bigskip
+
+\noindent\textbf{\large Overarching (affects the whole paper)}
+\begin{itemize}[leftmargin=1.4em, itemsep=0.45em]
+\item \bx \textbf{[R1, summary]} \emph{(substantial)} Make the exposition more
+accessible: add a worked example right after each key definition, and an intuitive
+proof sketch for the treewidth characterisation (reuse the vertex-elimination /
+decomposition-graph slide figure). Clarify the contribution relative to Markov \&
+Shi (2008) --- vertex-elimination vs.\ tree-decomposition definition of treewidth,
+and that the tensor-wise and index-wise algorithms attain the same optimal
+complexity --- and note that the software pre-computes cost under
+\texttt{opt-einsum}'s heuristics.
+\textbf{(partial done 2026-06-10:} intuitive proof sketch + the new
+elimination-sketch figure added after Proposition~\ref{pro:complexity_einsum};
+worked examples after the definitions, the Markov--Shi comparison and the
+tensor-wise/index-wise point still open.\textbf{)}
+\end{itemize}
+
+\medskip
+
+\noindent\textbf{\large By manuscript location (front $\to$ back)}
+\begin{enumerate}[label=\arabic*., leftmargin=*, itemsep=0.45em]
+
+\item $\boxtimes$\ \at{p.~\pageref{def:tensor_expression}, after Definitions~\ref{def:tensor_expression}--\ref{def:tensor_contraction} / Example~\ref{eg:running}.}
+\emph{[R1.2a, clear]} State that Example~\ref{eg:running} illustrates the case
+$B=\emptyset$, and that the examples with $B\neq\emptyset$ are in
+Appendix~\ref{app:examples}.
+\textbf{(done 2026-06-10}; the added passage also explains why $B \neq
+\emptyset$ is indispensable for the proof of
+Proposition~\ref{pro:complexity_einsum}; reply written.\textbf{)}
+
+\item $\boxtimes$\ \at{p.~\pageref{eg:running}, Example~\ref{eg:running}.}
+\emph{[R1.8, minor]} ``last example'' $\to$ ``running example''.
+\textbf{(done; reply written 2026-06-10.)}
+
+\item $\boxtimes$\ \at{p.~\pageref{def:mul_decomp}, Definition~\ref{def:mul_decomp}.}
+\emph{[R1.9, minor]} Explain the double-superscript notation $\in[m]^{**}$.
+\textbf{(done 2026-06-10:} resolved by \emph{removing} $[m]^{**}$ altogether ---
+Definition~\ref{def:mul_decomp} now states $A_k \in [m]^{*}$ directly, matching
+Definition~\ref{def:tensor_expression}; reply written.\textbf{)}
+
+\item $\boxtimes$\ \at{Section~\ref{sec:alg_v} (p.~\pageref{sec:alg_v}).}
+\emph{[R1.1, substantial]} Add a cost-summary remark (worked on the dcov example)
+separating the three sources of cost: tensorization (Algorithm~\ref{alg:tensorization}),
+finding the \textsc{Einsum} ordering, and executing it; explain why the entry-access
+cost assumed in Definition~\ref{def:tensors} is asymptotically negligible.
+\textbf{(done 2026-06-10:} new tensorization-cost remark after
+Algorithm~\ref{alg:tensorization} ($O(K n^{m_{\max}})$, dominated since
+$m_{\max} \le \mathsf{tw}+1$) + entry-access convention spelled out after
+Definition~\ref{def:tensors}; both replies written. The dcov walkthrough from
+the original plan was dropped.\textbf{)}
+
+\item \bx \at{Main complexity result, Proposition~\ref{pro:complexity_einsum} (p.~\pageref{pro:complexity_einsum}).}
+\emph{[R2.2, substantial]} Add a space/memory-complexity analysis: state it in the
+main theorem, add a remark after the tensorization step, and give an appendix bound
+on the size of the largest intermediate tensor in the \textsc{Einsum} contraction.
+\textbf{(partial done 2026-06-18:} the index-wise space bound $O(n^{\mathsf{tw}})$
+is now stated in the main text after Proposition~\ref{pro:complexity_einsum}, and
+Appendix~\ref{app:index_tensor} bounds the largest tensor-wise intermediate by
+$O(n^{\mathsf{tw}+1})$ (carving-width point) with the dcov necessity example;
+still open: a memory column in the empirical tables.\textbf{)}
+
+\item \bx \at{Proposition~\ref{pro:complexity_einsum} (p.~\pageref{pro:complexity_einsum}).}
+\emph{[R1.3, clear]} Add simple worked examples illustrating $\mathsf{tw}(G_{\mathcal{A}})$
+and how it is computed from the definitions.
+\textbf{(partial done 2026-06-10:} proof-sketch paragraphs + the new
+elimination-sketch figure are in the manuscript; the worked example computing
+$\mathsf{tw}$ for the chain / $K_4$ / dcov graphs is drafted but not yet
+pasted in; reply marked partial.\textbf{)}
+
+\item \bx \at{Treewidth result (p.~\pageref{pro:complexity_einsum}).}
+\emph{[R2.1, substantial]} Add the characterisation: an $m$-th order $U$-statistic has
+a complete decomposition graph iff the maximum treewidth of its quotient graph equals
+$m-1$ (easy to check). Even then, after sparsification a single \textsc{Einsum}
+operation still beats naive brute force (motif counting is the example).
+
+\item \bx \at{Remark~\ref{rem:ordering} (Remark~3, p.~\pageref{rem:ordering}) and new Appendix~\ref{app:index_tensor}.}
+\emph{[R1.4, substantial]} Distinguish the index-wise (theoretical) and tensor-wise
+(practical) regimes and report the ``real'' complexity via the HOIF table; add a
+remark/experiment comparing greedy vs.\ exhaustive ordering (time to \emph{find} vs.\
+FLOPs to \emph{execute}); and compare with the dynamic-programming approach of Zhang
+et al.\ (2025).
+\textbf{(partial done 2026-06-18:} after Proposition~\ref{pro:complexity_einsum} the
+main text now contrasts the index-wise and tensor-wise schemes and works
+Example~\ref{eg:index_tensor} ($\mathcal{A}=((1,2),(2,3),(3,4),(4,1),(1,3))$) index-wise;
+new Appendix~\ref{app:index_tensor} defines the tensor-wise primitives
+(Definition~\ref{def:tw_primitives}), proves the same time upper bound
+(Proposition~\ref{pro:tw_time}), and discusses space. Still open: greedy-vs-exhaustive
+timing and the Zhang et al.\ (2025) comparison.\textbf{)}
+
+\item \bx \at{Definition~\ref{def:v_set} (Definition~11, p.~\pageref{def:v_set}).}
+\emph{[R1.5a, clear]} Add a concrete example of the partition $\pi$ and the meaning of
+$Q\in\pi$.
+
+\item \bx \at{Algorithm~\ref{alg:induced_expression} (Algorithm~3, p.~\pageref{alg:induced_expression}).}
+\emph{[R1.5b, clear]} Add a small worked example constructing $\mathcal{A}_\pi$ step by
+step.
+
+\item \bx \at{Remark~\ref{rem:sparsification_terms_revised} (Remark~4, p.~\pageref{rem:sparsification_terms_revised}).}
+\emph{[R1.5c, clear]} Explain how to read equation~\eqref{eq:quotient_set} and how the
+stated conclusion follows.
+
+\item \bx \at{Remark~\ref{rem:U-complexity} (Remark~5, p.~\pageref{rem:U-complexity}).}
+\emph{[R1.6, substantial]} Explain how $N_l$ and $M$ are computed in practice
+(approximate, since exact treewidth is hard) --- e.g.\ extend the HOIF table and give a
+complete calculation for the dcov case.
+
+\item \bx \at{Section~\ref{sec:example_hoif} (HOIF, p.~\pageref{sec:example_hoif}).}
+\emph{[R1.7a, clear]} Map the HOIF example to the earlier notation: state what
+$\mathcal{A}=\{A_1,\dots,A_k\}$ and $h_k(\cdot)$ of Definition~\ref{def:mul_decomp} are
+in this case.
+
+\item \bx \at{Observation~\ref{obs:HOIF} (Observation~2, Appendix~\ref{app:HOIF}, p.~\pageref{obs:HOIF}).}
+\emph{[R1.7b, substantial]} Give the intuition behind it: why the analysis stops at
+$m=12$, and whether an approximate upper bound $M(m)$ captures how the complexity
+scales with $m$.
+
+\item \bx \at{Section~\ref{sec:example_motif} (motif counting, p.~\pageref{sec:example_motif}).}
+\emph{[R2.3, substantial]} Add a remark: because the relevant decomposition graph is
+already complete, our cost depends essentially only on $n$ and is largely independent
+of the edge density $p$, whereas enumeration-based methods (igraph, Peregrine,
+cuGraph) exploit sparsity and win in the sparse regime.
+
+\item $\boxtimes$\ \at{Appendix~\ref{app:examples} (Appendix~A, p.~\pageref{app:examples}).}
+\emph{[R1.2b, clear]} Rename the appendix examples (Example~\ref{eg:matrix multiplication}
+and Example~\ref{eg:tensor}) so they no longer clash with the main-text numbering,
+e.g.\ A.2 and A.3.
+\textbf{(done 2026-06-10} via \texttt{\textbackslash numberwithin\{example\}\{section\}}
+after \texttt{\textbackslash appendix}: appendix examples are now A.1, A.2 and
+C.1; reply written.\textbf{)}
+
+\end{enumerate}
+
+\end{document}
