@@ -11,6 +11,7 @@ import exp3_continued_fraction
 import exp4_matrix_products
 import exp5_classification
 import exp6_exponent
+import exp7_edgeworth
 
 if __name__ == "__main__":
     exp1_golden_mean.main()
@@ -19,4 +20,5 @@ if __name__ == "__main__":
     exp4_matrix_products.main()
     exp5_classification.main()
     exp6_exponent.main()
+    exp7_edgeworth.main()
     print("\nAll experiments finished; figures written to ../figures/.")
